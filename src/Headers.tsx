@@ -30,7 +30,8 @@ export default class Headers extends Component<TableProps & HeaderProps> {
                 height: "100%",
                 justifyContent: "center",
                 alignItems: "center",
-                ...this.props.cellStyle
+                ...this.props.cellStyle,
+                ...styles.header,
             }]} >
                 <Text style={styles.text}>{val}</Text>
             </View>

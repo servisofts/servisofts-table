@@ -6,36 +6,38 @@ import SVariableSizeGrid from "./Components/SVariableSizeGrid";
 import Headers from "./Headers";
 import RowNumbers from "./RowNumbers";
 import ToolBar from "./ToolBar";
+import FloatView from "./FloatView";
 
 type STablePropsType = {
     loadData: Promise<any>,
     cellStyle: TextStyle
-
+    style: typeof styles,
 }
 
 
-const DefaultCellStyle: TextStyle = {
-    borderColor: "#222",
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    height: 24,
-    justifyContent: "center",
-    color: "#fff",
-    fontSize: 12,
-    padding: 2
-}
 
 function STable(props: STablePropsType) {
-    const cellStyle: TextStyle = {
-        ...DefaultCellStyle,
+    let style = props.style ?? {}
+    Object.keys(styles).map(k => {
+        styles[k] = {
+            ...styles[k],
+            ...(style[k] ?? {})
+        }
+    })
+    const cellStyle: any = {
+        ...styles.cell,
+        ...styles.text,
         ...props.cellStyle ?? {}
     }
     const [keyInstance, setKeyInstance] = useState(new Date().getTime() + "");
     const [data, setData] = useState([]);
-    const [cols, setCols] = useState<colProps[]>(new Array<colProps>(20).fill({ wpx: 100 }));
+    const [cols, setCols] = useState<colProps[]>(new Array<colProps>(30).fill({ wpx: 100 }));
     const [rows, setRows] = useState<rowProps[]>(new Array<rowProps>(20000).fill({ hpx: cellStyle.height as number }));
     const header = useRef<Headers>();
     const numbers = useRef<RowNumbers>();
+
+
+
     useEffect(() => {
         props.loadData.then(e => {
             setData(e);
@@ -59,7 +61,6 @@ function STable(props: STablePropsType) {
             data={data}
             cellStyle={cellStyle}
             handleScroll={(e) => {
-
                 header.current.scrollTo({ x: e.x, y: 0 })
                 numbers.current.scrollTo({ x: 0, y: e.y })
             }} />
@@ -68,8 +69,10 @@ function STable(props: STablePropsType) {
 
     const HandleExportExcel = () => {
         console.log(data);
+
     }
-    const widthNumbers = 40
+    const widthNumbers = styles.cellNumber.width ?? 40
+
     return <View style={styles.container}>
         <ToolBar cellStyle={cellStyle} />
         <View style={{ height: 4 }} ></View>
@@ -83,6 +86,7 @@ function STable(props: STablePropsType) {
                     cols[e.index] = { ...cols[e.index], wpx: e.size }
                     setKeyInstance(new Date().getTime() + "")
                     setCols([...cols])
+                    console.log(e);
                 }} />
         </View>
         <View style={{ width: "100%", flex: 1, flexDirection: "row" }}>
@@ -92,6 +96,7 @@ function STable(props: STablePropsType) {
             <View style={{ height: "100%", flex: 1 }}>
                 {TABLE}
             </View>
+            <FloatView />
         </View>
     </View>
 }

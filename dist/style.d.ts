@@ -1,4 +1,4 @@
-declare const styles: {
+declare let styles: {
     container: {
         width: string;
         flex: number;
@@ -7,21 +7,29 @@ declare const styles: {
         color: string;
         fontSize: number;
     };
-    button: {
-        borderWidth: number;
+    cell: {
         borderColor: string;
+        borderBottomWidth: number;
+        borderRightWidth: number;
+        height: number;
+        justifyContent: string;
+        color: string;
+        fontSize: number;
         padding: number;
-        borderRadius: number;
     };
     cellNumber: {
         height: number;
-        overflow: "hidden";
-        width: string;
-        justifyContent: "center";
-        alignItems: "center";
+        width: number;
+        overflow: string;
+        justifyContent: string;
+        alignItems: string;
+        backgroundColor: string;
+    };
+    header: {
+        backgroundColor: string;
     };
     row: {
-        flexDirection: "row";
+        flexDirection: string;
         flex: number;
     };
 };

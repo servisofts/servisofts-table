@@ -52,11 +52,11 @@ var RowNumbers = /** @class */ (function (_super) {
         var _this = this;
         var ItemRow = function (_a) {
             var val = _a.val;
-            return React.createElement(View, { style: [styles.cellNumber, __assign({}, _this.props.cellStyle)] },
-                React.createElement(Text, { style: {
-                        fontSize: 11,
-                        color: "#ffffff"
-                    } }, val));
+            var sty = __assign(__assign({}, styles.cellNumber), _this.props.cellStyle);
+            return React.createElement(View, { style: sty },
+                React.createElement(Text, { style: [styles.text, {
+                            fontSize: 11
+                        }] }, val));
         };
         return React.createElement(SFlashList, { data: this.props.rows, ref: function (ref) { return _this.scroll = ref; }, scrollEnabled: false, estimatedItemSize: 24, keyExtractor: this.keyExtractor, 
             // getItemLayout={this.getItemLayout.bind(this)}

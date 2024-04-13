@@ -43,6 +43,7 @@ var SResizableView = /** @class */ (function (_super) {
                 _this.startWidth = _this.state.width;
             },
             onPanResponderMove: function (evt, gestureState) {
+                _this.state.width = _this.startWidth + gestureState.dx;
                 _this.setState({ width: _this.startWidth + gestureState.dx });
                 evt.stopPropagation();
                 evt.preventDefault();

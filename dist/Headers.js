@@ -38,7 +38,7 @@ var Headers = /** @class */ (function (_super) {
             return React.createElement(SResizableView, { width: width, onContentSizeChange: function (e) {
                     _this.props.onChangeColSize({ index: index, size: e });
                 } },
-                React.createElement(View, { style: [, __assign({ width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }, _this.props.cellStyle)] },
+                React.createElement(View, { style: [, __assign(__assign({ width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }, _this.props.cellStyle), styles.header)] },
                     React.createElement(Text, { style: styles.text }, val)));
         };
         return _this;

@@ -26,6 +26,7 @@ export default class SResizableView extends Component<PropsType> {
                 this.startWidth = this.state.width
             },
             onPanResponderMove: (evt, gestureState) => {
+                this.state.width = this.startWidth + gestureState.dx;
                 this.setState({ width: this.startWidth + gestureState.dx, });
                 evt.stopPropagation();
                 evt.preventDefault();

@@ -25,23 +25,19 @@ import SVariableSizeGrid from "./Components/SVariableSizeGrid";
 import Headers from "./Headers";
 import RowNumbers from "./RowNumbers";
 import ToolBar from "./ToolBar";
-var DefaultCellStyle = {
-    borderColor: "#222",
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    height: 24,
-    justifyContent: "center",
-    color: "#fff",
-    fontSize: 12,
-    padding: 2
-};
+import FloatView from "./FloatView";
 function STable(props) {
-    var _a;
-    var cellStyle = __assign(__assign({}, DefaultCellStyle), (_a = props.cellStyle) !== null && _a !== void 0 ? _a : {});
-    var _b = useState(new Date().getTime() + ""), keyInstance = _b[0], setKeyInstance = _b[1];
-    var _c = useState([]), data = _c[0], setData = _c[1];
-    var _d = useState(new Array(20).fill({ wpx: 100 })), cols = _d[0], setCols = _d[1];
-    var _e = useState(new Array(20000).fill({ hpx: cellStyle.height })), rows = _e[0], setRows = _e[1];
+    var _a, _b, _c;
+    var style = (_a = props.style) !== null && _a !== void 0 ? _a : {};
+    Object.keys(styles).map(function (k) {
+        var _a;
+        styles[k] = __assign(__assign({}, styles[k]), ((_a = style[k]) !== null && _a !== void 0 ? _a : {}));
+    });
+    var cellStyle = __assign(__assign(__assign({}, styles.cell), styles.text), (_b = props.cellStyle) !== null && _b !== void 0 ? _b : {});
+    var _d = useState(new Date().getTime() + ""), keyInstance = _d[0], setKeyInstance = _d[1];
+    var _e = useState([]), data = _e[0], setData = _e[1];
+    var _f = useState(new Array(30).fill({ wpx: 100 })), cols = _f[0], setCols = _f[1];
+    var _g = useState(new Array(20000).fill({ hpx: cellStyle.height })), rows = _g[0], setRows = _g[1];
     var header = useRef();
     var numbers = useRef();
     useEffect(function () {
@@ -65,7 +61,7 @@ function STable(props) {
     var HandleExportExcel = function () {
         console.log(data);
     };
-    var widthNumbers = 40;
+    var widthNumbers = (_c = styles.cellNumber.width) !== null && _c !== void 0 ? _c : 40;
     return React.createElement(View, { style: styles.container },
         React.createElement(ToolBar, { cellStyle: cellStyle }),
         React.createElement(View, { style: { height: 4 } }),
@@ -75,10 +71,12 @@ function STable(props) {
                     cols[e.index] = __assign(__assign({}, cols[e.index]), { wpx: e.size });
                     setKeyInstance(new Date().getTime() + "");
                     setCols(__spreadArray([], cols, true));
+                    console.log(e);
                 } })),
         React.createElement(View, { style: { width: "100%", flex: 1, flexDirection: "row" } },
             React.createElement(View, { style: { height: "100%", width: widthNumbers } },
                 React.createElement(RowNumbers, { ref: numbers, cellStyle: cellStyle, cols: cols, rows: rows, width: width, data: data })),
-            React.createElement(View, { style: { height: "100%", flex: 1 } }, TABLE)));
+            React.createElement(View, { style: { height: "100%", flex: 1 } }, TABLE),
+            React.createElement(FloatView, null)));
 }
 export default STable;

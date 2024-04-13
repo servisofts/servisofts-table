@@ -31,7 +31,8 @@ interface RowItemProps {
 }
 
 const RowItem: React.FC<RowItemProps> = ({ row, index, cols, data, cellStyle }) => {
-  return <View style={[styles.row]}>{cols.map((col, ci) => <CellItem key={ci} row={row} col={col} ri={index} ci={ci} data={data} cellStyle={cellStyle} />)}</View>;
+  const ty:any = styles.row;
+  return <View style={ty}>{cols.map((col, ci) => <CellItem key={ci} row={row} col={col} ri={index} ci={ci} data={data} cellStyle={cellStyle} />)}</View>;
 }
 
 const SVariableSizeGrid: React.FC<SVariableSizeGridType> = ({ rows, cols, width, data, handleScroll, keyInstance, cellStyle }) => {

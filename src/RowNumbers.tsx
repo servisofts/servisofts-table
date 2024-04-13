@@ -23,14 +23,14 @@ export default class RowNumbers extends Component<TableProps> {
 
     render() {
         const ItemRow = ({ val }: any) => {
-            return <View style={[styles.cellNumber, { ...this.props.cellStyle }]} >
-                <Text style={{
+            const sty:any = { ...styles.cellNumber, ...this.props.cellStyle }
+            return <View style={sty} >
+                <Text style={[styles.text, {
                     fontSize: 11,
-                    color: "#ffffff",
-                }} >{val}</Text>
+                }]} >{val}</Text>
             </View>
         }
-        
+
         return <SFlashList data={this.props.rows}
             ref={ref => this.scroll = ref}
             scrollEnabled={false}

@@ -10,7 +10,8 @@ var CellItem = function (_a) {
 };
 var RowItem = function (_a) {
     var row = _a.row, index = _a.index, cols = _a.cols, data = _a.data, cellStyle = _a.cellStyle;
-    return React.createElement(View, { style: [styles.row] }, cols.map(function (col, ci) { return React.createElement(CellItem, { key: ci, row: row, col: col, ri: index, ci: ci, data: data, cellStyle: cellStyle }); }));
+    var ty = styles.row;
+    return React.createElement(View, { style: ty }, cols.map(function (col, ci) { return React.createElement(CellItem, { key: ci, row: row, col: col, ri: index, ci: ci, data: data, cellStyle: cellStyle }); }));
 };
 var SVariableSizeGrid = function (_a) {
     var rows = _a.rows, cols = _a.cols, width = _a.width, data = _a.data, handleScroll = _a.handleScroll, keyInstance = _a.keyInstance, cellStyle = _a.cellStyle;
