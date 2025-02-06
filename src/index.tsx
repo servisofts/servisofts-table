@@ -9,9 +9,9 @@ import ToolBar from "./ToolBar";
 import FloatView from "./FloatView";
 
 type STablePropsType = {
-    loadData: Promise<any>,
-    cellStyle: TextStyle
-    style: typeof styles,
+    loadData: () => Promise<any[]>,
+    cellStyle?: TextStyle
+    style?: Partial<typeof styles>,
 }
 
 
@@ -32,14 +32,14 @@ function STable(props: STablePropsType) {
     const [keyInstance, setKeyInstance] = useState(new Date().getTime() + "");
     const [data, setData] = useState([]);
     const [cols, setCols] = useState<colProps[]>(new Array<colProps>(30).fill({ wpx: 100 }));
-    const [rows, setRows] = useState<rowProps[]>(new Array<rowProps>(20000).fill({ hpx: cellStyle.height as number }));
+    const [rows, setRows] = useState<rowProps[]>(new Array<rowProps>(1000).fill({ hpx: cellStyle.height as number }));
     const header = useRef<Headers>();
     const numbers = useRef<RowNumbers>();
 
 
 
     useEffect(() => {
-        props.loadData.then(e => {
+        props.loadData().then(e => {
             setData(e);
             setRows([...rows])
         }).catch(e => {

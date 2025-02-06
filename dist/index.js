@@ -37,11 +37,11 @@ function STable(props) {
     var _d = useState(new Date().getTime() + ""), keyInstance = _d[0], setKeyInstance = _d[1];
     var _e = useState([]), data = _e[0], setData = _e[1];
     var _f = useState(new Array(30).fill({ wpx: 100 })), cols = _f[0], setCols = _f[1];
-    var _g = useState(new Array(20000).fill({ hpx: cellStyle.height })), rows = _g[0], setRows = _g[1];
+    var _g = useState(new Array(1000).fill({ hpx: cellStyle.height })), rows = _g[0], setRows = _g[1];
     var header = useRef();
     var numbers = useRef();
     useEffect(function () {
-        props.loadData.then(function (e) {
+        props.loadData().then(function (e) {
             setData(e);
             setRows(__spreadArray([], rows, true));
         })["catch"](function (e) {
