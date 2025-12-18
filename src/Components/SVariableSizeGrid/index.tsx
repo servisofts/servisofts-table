@@ -2,7 +2,7 @@ import { Text, View } from 'react-native'
 import React, { Component } from 'react'
 import { VariableSizeGrid as Grid } from 'react-window';
 import { TableProps } from '../../types';
-import styles from '../../style';
+import styles from '../../STable/style';
 import { SVariableSizeGridType } from './type';
 import { StyleToCSS } from '../StyleUtils';
 

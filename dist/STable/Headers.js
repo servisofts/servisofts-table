@@ -26,7 +26,7 @@ var __assign = (this && this.__assign) || function () {
 };
 import { ScrollView, Text, View, FlatList, Platform } from 'react-native';
 import React, { Component } from 'react';
-import SResizableView from './Components/SResizableView';
+import SResizableView from '../Components/SResizableView';
 import styles from './style';
 var Headers = /** @class */ (function (_super) {
     __extends(Headers, _super);

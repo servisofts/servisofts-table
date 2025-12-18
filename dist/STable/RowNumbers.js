@@ -27,7 +27,7 @@ var __assign = (this && this.__assign) || function () {
 import { Text, View } from 'react-native';
 import React, { Component } from 'react';
 import styles from './style';
-import SFlashList from './Components/SFlashList';
+import SFlashList from '../Components/SFlashList';
 var RowNumbers = /** @class */ (function (_super) {
     __extends(RowNumbers, _super);
     function RowNumbers() {

@@ -26,7 +26,7 @@
     "include": [
         "src",
         "lib",
-        "src/img",
+        "src/Assets/**/*",
         "src/declarations.d.ts"
     ],
     "exclude": [

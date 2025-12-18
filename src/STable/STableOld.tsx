@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Text, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native";
 import styles from "./style";
 import { colProps, rowProps } from "./types";
-import SVariableSizeGrid from "./Components/SVariableSizeGrid";
+import SVariableSizeGrid from "../Components/SVariableSizeGrid";
 import Headers from "./Headers";
 import RowNumbers from "./RowNumbers";
 import ToolBar from "./ToolBar";

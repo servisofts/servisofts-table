@@ -1,10 +1,4 @@
-/// <reference types="react" />
-import { TextStyle } from "react-native";
-import styles from "./style";
-type STablePropsType = {
-    loadData: () => Promise<any[]>;
-    cellStyle?: TextStyle;
-    style?: Partial<typeof styles>;
-};
-declare function STable(props: STablePropsType): JSX.Element;
+import STable from "./STable/STableOld";
+export * from "./DinamicTable";
+export { STable };
 export default STable;

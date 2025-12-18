@@ -4,7 +4,7 @@ import React, { useMemo, ReactElement, useState } from 'react';
 import { ScrollView, Text, TextStyle, View, ViewStyle } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { TableProps, colProps, rowProps } from '../../types';
-import styles from '../../style';
+import styles from '../../STable/style';
 import { SVariableSizeGridType } from './type';
 
 interface CellItemProps {

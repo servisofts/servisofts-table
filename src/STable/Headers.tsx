@@ -1,6 +1,6 @@
 import { ScrollView, Text, View, TouchableOpacity, FlatList, Platform } from 'react-native'
 import React, { Component } from 'react'
-import SResizableView from './Components/SResizableView';
+import SResizableView from '../Components/SResizableView';
 import { TableProps } from './types';
 import styles from './style';
 

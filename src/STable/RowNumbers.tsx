@@ -2,7 +2,7 @@ import { ScrollView, Text, View, TouchableOpacity, FlatList } from 'react-native
 import React, { Component } from 'react'
 import { TableProps } from './types';
 import styles from './style';
-import SFlashList from './Components/SFlashList';
+import SFlashList from '../Components/SFlashList';
 
 export default class RowNumbers extends Component<TableProps> {
     state = {}

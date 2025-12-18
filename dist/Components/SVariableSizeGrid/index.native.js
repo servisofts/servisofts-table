@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import styles from '../../style';
+import styles from '../../STable/style';
 var CellItem = function (_a) {
     var _b, _c;
     var row = _a.row, col = _a.col, ri = _a.ri, ci = _a.ci, data = _a.data, cellStyle = _a.cellStyle;
