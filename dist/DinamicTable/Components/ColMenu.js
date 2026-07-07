@@ -275,7 +275,7 @@ var ColMenu = function (props) {
                             } },
                             React.createElement(CheckBox, { value: isCheck, color: colors.accent, colorActive: colors.accent }),
                             React.createElement(View, { style: { width: 4 } }),
-                            React.createElement(View, { style: { flex: 1 } }, COMPONENT));
+                            React.createElement(View, { style: { flex: 1 }, pointerEvents: "none" }, COMPONENT));
                     } })),
             React.createElement(View, { style: { height: 1, backgroundColor: colors.border } }));
     };
@@ -351,7 +351,9 @@ var ColMenu = function (props) {
             React.createElement(View, { style: { height: 1, backgroundColor: colors.border } }),
             React.createElement(View, { style: { height: 5 } }),
             React.createElement(Select, { dinamicTableInstance: props.col.props.dinamicTableInstance, defaultValue: search.operator, icon: React.createElement(Assets.Filter, { stroke: colors.accent }), options: OPERADORES[props.col.props.dataType], onSelect: function (e) {
-                    setSearch(__assign(__assign({}, search), { operator: e.value }));
+                    var _a;
+                    var newOp = OPERADORES[props.col.props.dataType].find(function (op) { return op.value === e.value; });
+                    setSearch(__assign(__assign({}, search), { operator: e.value, value: ((_a = newOp === null || newOp === void 0 ? void 0 : newOp.params) !== null && _a !== void 0 ? _a : 1) <= 0 ? [] : search.value }));
                 } }),
             React.createElement(View, { style: { height: 4 } }),
             !!((_a = (OP !== null && OP !== void 0 ? OP : {})) === null || _a === void 0 ? void 0 : _a.params) ? new Array(OP === null || OP === void 0 ? void 0 : OP.params).fill(0).map(function (e, index) {
@@ -360,6 +362,38 @@ var ColMenu = function (props) {
                     :
                         RenderFilterTypeText(index);
             }) : null);
+    };
+    var hanldeGroup = function () {
+        var _a;
+        var instance = props.col.props.dinamicTableInstance;
+        var colId = (_a = props.col.props.id) !== null && _a !== void 0 ? _a : "";
+        var existingI = instance.groupers.findIndex(function (g) { return g.key == colId; });
+        if (existingI >= 0) {
+            instance.groupers.splice(existingI, 1);
+        }
+        else {
+            instance.groupers = [{
+                    key: colId,
+                    type: props.col.props.dataType,
+                    dateFormat: props.col.props.dateFormat
+                }];
+        }
+        instance.popup.close("colMenu");
+        instance.applyGroup();
+    };
+    var RenderGrouper = function () {
+        if (!!props.col.props.disableGrouper)
+            return null;
+        var isGrouped = props.col.props.dinamicTableInstance.groupers.some(function (g) { return g.key == props.col.props.id; });
+        var ListIcon = Assets.List;
+        return React.createElement(React.Fragment, null,
+            React.createElement(TouchableOpacity, { onPress: hanldeGroup, style: { flexDirection: "row", alignItems: "center" } },
+                React.createElement(ListIcon, { width: 16, height: 16, stroke: colors.accent }),
+                React.createElement(View, { style: { width: 2 } }),
+                React.createElement(Text, { numberOfLines: 1, style: { color: colors.text, fontSize: 12 } }, isGrouped
+                    ? SLanguage.select({ en: "Remove group", es: "Quitar agrupación" })
+                    : SLanguage.select({ en: "Group by", es: "Agrupar por" }))),
+            React.createElement(View, { style: { height: 4 } }));
     };
     var RenderSorter = function () {
         if (!!props.col.props.disableSorter)
@@ -406,6 +440,7 @@ var ColMenu = function (props) {
                 es: "Ajustar contenido"
             }))),
         React.createElement(View, { style: { height: 8 } }),
+        RenderGrouper(),
         RenderSorter(),
         RenderFilterInput(),
         RenderFilterList(),

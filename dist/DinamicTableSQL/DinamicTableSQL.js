@@ -135,10 +135,11 @@ var DinamicTableSQL = /** @class */ (function (_super) {
         _this.loadData = function (reset) {
             if (reset === void 0) { reset = true; }
             return __awaiter(_this, void 0, void 0, function () {
-                var data;
+                var data, error_1;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
+                            _a.trys.push([0, 2, , 3]);
                             if (!this.props.loadData)
                                 throw "DinamicTableSQL: Function loadData is required";
                             if (reset) {
@@ -162,13 +163,18 @@ var DinamicTableSQL = /** @class */ (function (_super) {
                             this.loadSize();
                             this.forceUpdate();
                             console.log("DinamicTableSQL", data);
-                            return [2 /*return*/];
+                            return [3 /*break*/, 3];
+                        case 2:
+                            error_1 = _a.sent();
+                            console.error("Error loading data:", error_1);
+                            throw error_1;
+                        case 3: return [2 /*return*/];
                     }
                 });
             });
         };
         _this.loadSize = function () { return __awaiter(_this, void 0, void 0, function () {
-            var size, error_1;
+            var size, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -187,7 +193,7 @@ var DinamicTableSQL = /** @class */ (function (_super) {
                         this.counter.setState({ count: size, loading: false });
                         return [3 /*break*/, 4];
                     case 3:
-                        error_1 = _a.sent();
+                        error_2 = _a.sent();
                         this.counter.setState({ loading: false });
                         return [3 /*break*/, 4];
                     case 4: return [2 /*return*/];

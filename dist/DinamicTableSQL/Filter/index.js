@@ -50,7 +50,8 @@ export var OPERATORS = {
     IS_NOT_NULL: "isnotnull",
     IS_TRUE: "istrue",
     IS_FALSE: "isfalse",
-    BETWEEN: "between"
+    BETWEEN: "between",
+    IS_NOW: "isnow"
 };
 var OPERATORS_FUNCTIONS = (_a = {},
     _a[OPERATORS.EQUAL] = function (data, value, filtro) {
@@ -161,6 +162,12 @@ var OPERATORS_FUNCTIONS = (_a = {},
             return data.getTime() >= startDate.getTime() && data.getTime() <= endDate.getTime();
         }
         return data >= start && data <= end;
+    },
+    _a[OPERATORS.IS_NOW] = function (data) {
+        var now = new Date();
+        return data.getFullYear() === now.getFullYear() &&
+            data.getMonth() === now.getMonth() &&
+            data.getDate() === now.getDate();
     },
     _a);
 var Filter = /** @class */ (function () {

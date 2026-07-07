@@ -1,5 +1,7 @@
 import { FilterType, OPERATORS } from "../Filter";
 
+const IS_NOW = "isnow";
+
 const FormatDate = (filtro: FilterType) => {
     const date = new Date(filtro.value);
     const year = date.getFullYear();
@@ -80,6 +82,7 @@ export const wheresPostgres: { [key: string]: (filtro: FilterType) => string } =
     [OPERATORS.IS_NOT_NULL]: (filtro: FilterType) => `${filtro.col} IS NOT NULL`,
     [OPERATORS.IS_TRUE]: (filtro: FilterType) => `${filtro.col} IS TRUE`,
     [OPERATORS.IS_FALSE]: (filtro: FilterType) => `${filtro.col} IS FALSE`,
+    [IS_NOW]: (filtro: FilterType) => `${filtro.col} = NOW()`,
 };
 
 export const wheresMySQL: { [key: string]: (filtro: FilterType) => string } = {
@@ -120,6 +123,7 @@ export const wheresMySQL: { [key: string]: (filtro: FilterType) => string } = {
     [OPERATORS.IS_NOT_NULL]: (filtro: FilterType) => `${filtro.col} IS NOT NULL`,
     [OPERATORS.IS_TRUE]: (filtro: FilterType) => `${filtro.col} = TRUE`,
     [OPERATORS.IS_FALSE]: (filtro: FilterType) => `${filtro.col} = FALSE`,
+    [IS_NOW]: (filtro: FilterType) => `${filtro.col} = NOW()`,
 };
 
 export default {

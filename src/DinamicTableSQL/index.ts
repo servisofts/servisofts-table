@@ -17,6 +17,7 @@ export const OPERATORS = {
     IS_TRUE: "istrue",
     IS_FALSE: "isfalse",
     BETWEEN: "between",
+    IS_NOW: "isnow",
 }
 
 
@@ -57,6 +58,7 @@ export const OPERADORES = {
         { value: OPERATORS.GREATER_THAN_OR_EQUAL, label: { en: "Greater than or equal to", es: "Mayor o igual que" }, params: 1 },
         { value: OPERATORS.IS_NULL, label: { en: "Is null", es: "Es nulo" }, params: 0 },
         { value: OPERATORS.IS_NOT_NULL, label: { en: "Is not null", es: "No es nulo" }, params: 0 },
+        { value: OPERATORS.IS_NOW, label: { en: "= now()", es: "= ahora()" }, params: 0 },
     ],
 }
 

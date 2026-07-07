@@ -257,7 +257,8 @@ const ColMenu = (props: { col: Col<any> }) => {
                 defaultValue={search.operator}
                 icon={<Assets.Filter stroke={colors.accent} />}
                 options={OPERADORES[props.col.props.dataType]} onSelect={e => {
-                    setSearch({ ...search, operator: e.value })
+                    const newOp = OPERADORES[props.col.props.dataType].find(op => op.value === e.value);
+                    setSearch({ ...search, operator: e.value, value: (newOp?.params ?? 1) <= 0 ? [] : search.value })
                 }} />
             {/* </View> */}
             <View style={{ height: 4, }} />

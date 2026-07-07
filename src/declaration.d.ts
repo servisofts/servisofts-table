@@ -1,4 +1,6 @@
 
+declare module 'react-window';
+
 declare module '*.svg?inline' {
     const content: any
     export default content

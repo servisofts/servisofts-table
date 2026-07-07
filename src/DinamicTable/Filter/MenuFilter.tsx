@@ -37,7 +37,8 @@ export default class MenuFilter<T> extends React.Component<MenuFilterPropsType> 
                     })
                 }
             }
-            return <><View style={{ width: 4 }} />
+            return <>
+            {/* <View style={{ width: 4 }} /> */}
                 <TouchableOpacity style={{
                     padding: 4,
                     paddingRight: 4,

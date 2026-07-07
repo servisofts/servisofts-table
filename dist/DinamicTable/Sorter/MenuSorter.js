@@ -31,7 +31,6 @@ var MenuSorter = /** @class */ (function (_super) {
             var _a, _b;
             var header = _this.props.dinamicTableInstance.cols.find(function (a) { return a.key == item.key; });
             return React.createElement(React.Fragment, null,
-                React.createElement(View, { style: { width: 4 } }),
                 React.createElement(TouchableOpacity, { style: {
                         // padding: 2,
                         padding: 4,

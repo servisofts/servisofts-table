@@ -22,6 +22,7 @@ export declare const OPERATORS: {
     IS_TRUE: string;
     IS_FALSE: string;
     BETWEEN: string;
+    IS_NOW: string;
 };
 export default class Filter {
     static filterData(data: any[], filters: FilterType[]): Promise<any[]>;

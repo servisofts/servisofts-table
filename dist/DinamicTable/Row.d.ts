@@ -4,10 +4,12 @@ export type RowPropsType<T> = {
     item: T;
     index: number;
     dinamicTableInstance: DinamicTable<T>;
+    colWidthVersion: number;
 };
-export default class Row<T> extends React.Component<RowPropsType<T>> {
+export default class Row<T> extends React.PureComponent<RowPropsType<T>> {
     state: {
         selected: boolean;
+        hover: boolean;
     };
     static defaultProps: {};
     componentDidMount(): void;

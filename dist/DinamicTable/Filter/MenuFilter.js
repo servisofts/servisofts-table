@@ -48,7 +48,6 @@ var MenuFilter = /** @class */ (function (_super) {
                 }
             }
             return React.createElement(React.Fragment, null,
-                React.createElement(View, { style: { width: 4 } }),
                 React.createElement(TouchableOpacity, { style: {
                         padding: 4,
                         paddingRight: 4,

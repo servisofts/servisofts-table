@@ -26,6 +26,7 @@ export const OPERATORS = {
     IS_TRUE: "istrue",
     IS_FALSE: "isfalse",
     BETWEEN: "between",
+    IS_NOW: "isnow",
 }
 
 const OPERATORS_FUNCTIONS: { [key: string]: (data: any, value: any, filtro: FilterType) => boolean } = {
@@ -134,6 +135,12 @@ const OPERATORS_FUNCTIONS: { [key: string]: (data: any, value: any, filtro: Filt
         }
 
         return data >= start && data <= end;
+    },
+    [OPERATORS.IS_NOW]: (data) => {
+        const now = new Date();
+        return data.getFullYear() === now.getFullYear() &&
+            data.getMonth() === now.getMonth() &&
+            data.getDate() === now.getDate();
     },
 }
 

@@ -1,5 +1,6 @@
 var _a, _b;
 import { OPERATORS } from "../Filter";
+var IS_NOW = "isnow";
 var FormatDate = function (filtro) {
     var date = new Date(filtro.value);
     var year = date.getFullYear();
@@ -73,6 +74,7 @@ export var wheresPostgres = (_a = {},
     _a[OPERATORS.IS_NOT_NULL] = function (filtro) { return "".concat(filtro.col, " IS NOT NULL"); },
     _a[OPERATORS.IS_TRUE] = function (filtro) { return "".concat(filtro.col, " IS TRUE"); },
     _a[OPERATORS.IS_FALSE] = function (filtro) { return "".concat(filtro.col, " IS FALSE"); },
+    _a[IS_NOW] = function (filtro) { return "".concat(filtro.col, " = NOW()"); },
     _a);
 export var wheresMySQL = (_b = {},
     _b[OPERATORS.EQUAL] = makeOperatorHandler(function (col, val) { return "".concat(col, " = ").concat(val); }),
@@ -112,6 +114,7 @@ export var wheresMySQL = (_b = {},
     _b[OPERATORS.IS_NOT_NULL] = function (filtro) { return "".concat(filtro.col, " IS NOT NULL"); },
     _b[OPERATORS.IS_TRUE] = function (filtro) { return "".concat(filtro.col, " = TRUE"); },
     _b[OPERATORS.IS_FALSE] = function (filtro) { return "".concat(filtro.col, " = FALSE"); },
+    _b[IS_NOW] = function (filtro) { return "".concat(filtro.col, " = NOW()"); },
     _b);
 export default {
     wheresPostgres: wheresPostgres,

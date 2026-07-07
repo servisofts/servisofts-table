@@ -18,7 +18,7 @@ export default class MenuSorter<T> extends React.Component<MenuSorterPropsType> 
         return sorters.map((item, index) => {
             const header: any = this.props.dinamicTableInstance.cols.find(a => a.key == item.key);
             return <>
-                <View style={{ width: 4 }} />
+                {/* <View style={{ width: 4 }} /> */}
                 <TouchableOpacity style={{
                     // padding: 2,
                     padding: 4,

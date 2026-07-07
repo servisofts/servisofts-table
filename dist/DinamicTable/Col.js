@@ -33,7 +33,9 @@ var Col = /** @class */ (function (_super) {
     __extends(Col, _super);
     function Col() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.state = {};
+        _this.state = {
+            isResizing: false
+        };
         _this.widthAnim = new Animated.Value(_this.props.dinamicTableInstance.colData[_this.props.id].width);
         _this.currentWidth = _this.props.dinamicTableInstance.colData[_this.props.id].width;
         _this.startX = 0;
@@ -41,6 +43,7 @@ var Col = /** @class */ (function (_super) {
             onStartShouldSetPanResponder: function () { return true; },
             onMoveShouldSetPanResponder: function () { return true; },
             onPanResponderGrant: function (evt) {
+                _this.setState({ isResizing: true });
                 _this.startX = evt.nativeEvent.pageX;
             },
             onPanResponderMove: function (evt) {
@@ -53,12 +56,24 @@ var Col = /** @class */ (function (_super) {
             },
             onPanResponderRelease: function (evt) {
                 _this.props.dinamicTableInstance.colData[_this.props.id].width = _this.currentWidth;
+                _this.props.dinamicTableInstance._colWidthVersion++;
+                _this.setState({ isResizing: false });
                 _this.props.dinamicTableInstance.forceUpdate();
                 // this.setState({ width: this.currentWidth });
             }
         });
         return _this;
     }
+    Col.prototype.componentDidUpdate = function () {
+        // Sync animation value with adjusted width when not resizing
+        if (!this.state.isResizing) {
+            var adjustedWidth = this.props.dinamicTableInstance.getAdjustedColumnWidth(this.props.id);
+            if (this.currentWidth !== adjustedWidth) {
+                this.currentWidth = adjustedWidth;
+                this.widthAnim.setValue(adjustedWidth);
+            }
+        }
+    };
     Col.prototype.showPopup = function (evt) {
         var _this = this;
         var dinamicTableInstance = this.props.dinamicTableInstance;
@@ -88,14 +103,32 @@ var Col = /** @class */ (function (_super) {
         return React.createElement(View, { style: { backgroundColor: dinamicTableInstance.colors.accent, borderRadius: 1 } },
             React.createElement(Assets.Arrow, { width: 10, height: 10, fill: dinamicTableInstance.colors.background, stroke: dinamicTableInstance.colors.background, transform: "rotate(".concat(sorter.order == "asc" ? 0 : 180, ")") }));
     };
+    Col.prototype.renderGrouper = function () {
+        var _this = this;
+        var grouped = this.props.dinamicTableInstance.groupers.some(function (g) { return g.key == _this.props.id; });
+        if (!grouped)
+            return null;
+        var ListIcon = Assets.List;
+        return React.createElement(View, { style: { backgroundColor: this.props.dinamicTableInstance.colors.accent, borderRadius: 1 } },
+            React.createElement(ListIcon, { width: 10, height: 10, fill: this.props.dinamicTableInstance.colors.background, stroke: this.props.dinamicTableInstance.colors.background }));
+    };
     Col.prototype.render = function () {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        var _this = this;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
         var colors = this.props.dinamicTableInstance.colors;
         var colData = (_b = (_a = this.props.dinamicTableInstance) === null || _a === void 0 ? void 0 : _a.colData) === null || _b === void 0 ? void 0 : _b[this.props.id];
+        // Use widthAnim for smooth resizing, but sync with adjusted width when not resizing
+        var adjustedWidth = this.props.dinamicTableInstance.getAdjustedColumnWidth(this.props.id);
+        // Determine if this is first or last visible column for border radius
+        var visibleCols = this.props.dinamicTableInstance.cols.filter(function (a) { return !_this.props.dinamicTableInstance.colData[a.key].hidden; });
+        var hasCheckCol = ((_d = (_c = this.props.dinamicTableInstance) === null || _c === void 0 ? void 0 : _c.props) === null || _d === void 0 ? void 0 : _d.selectType) === "check";
+        var isFirstColumn = visibleCols.length > 0 && visibleCols[0].key === this.props.id && !hasCheckCol;
+        var isLastColumn = visibleCols.length > 0 && visibleCols[visibleCols.length - 1].key === this.props.id;
+        var borderRadius = 8; // You can make this configurable later
         return React.createElement(View, { style: { flexDirection: "row", alignItems: "center" } },
             React.createElement(Animated.View, { style: [
                     {
-                        borderWidth: 0.5,
+                        // borderWidth: 0.5,
                         borderColor: colors.border,
                         minHeight: 26,
                         height: "100%",
@@ -104,21 +137,29 @@ var Col = /** @class */ (function (_super) {
                         alignItems: "center",
                         width: this.widthAnim,
                         borderBottomColor: colors.border,
-                        borderBottomWidth: 0.5
+                        borderBottomWidth: 0.5,
+                        borderTopLeftRadius: isFirstColumn ? borderRadius : 0,
+                        borderTopRightRadius: isLastColumn ? borderRadius : 0
                     },
-                    (_e = (_d = (_c = this.props) === null || _c === void 0 ? void 0 : _c.dinamicTableInstance) === null || _d === void 0 ? void 0 : _d.props) === null || _e === void 0 ? void 0 : _e.cellStyle,
+                    (_g = (_f = (_e = this.props) === null || _e === void 0 ? void 0 : _e.dinamicTableInstance) === null || _f === void 0 ? void 0 : _f.props) === null || _g === void 0 ? void 0 : _g.cellStyle,
                     this.props.headerStyle,
                 ] },
-                React.createElement(TouchableOpacity, { onPress: this.showPopup.bind(this), style: { width: "100%", flex: 1, justifyContent: "center", alignItems: "flex-end", flexDirection: "row", paddingStart: 2, paddingBottom: 2 } },
+                React.createElement(TouchableOpacity, { onPress: this.showPopup.bind(this), style: __assign({ width: "100%", flex: 1, justifyContent: "center", alignItems: "center", flexDirection: "row" }, this.props.headerStyle ? {
+                        justifyContent: this.props.headerStyle.justifyContent,
+                        alignItems: this.props.headerStyle.alignItems
+                    } : {}) },
                     this.props.labelIcon,
-                    React.createElement(Text, { style: [{ color: colors.text, overflow: "hidden", flexWrap: "wrap", textAlign: "center" }, (_h = (_g = (_f = this.props) === null || _f === void 0 ? void 0 : _f.dinamicTableInstance) === null || _g === void 0 ? void 0 : _g.props) === null || _h === void 0 ? void 0 : _h.textStyle, this.props.textStyle, (_l = (_k = (_j = this.props) === null || _j === void 0 ? void 0 : _j.dinamicTableInstance) === null || _k === void 0 ? void 0 : _k.props) === null || _l === void 0 ? void 0 : _l.textTitleStyle, this.props.textTitleStyle], numberOfLines: colData.wrap ? 0 : 1 }, this.props.label)),
-                this.props.children,
+                    this.props.labelIcon && this.props.label ? React.createElement(View, { style: { width: 8 } }) : null,
+                    React.createElement(Text, { style: [{ color: colors.text, overflow: "hidden", flexWrap: "wrap", textAlign: "center" }, (_k = (_j = (_h = this.props) === null || _h === void 0 ? void 0 : _h.dinamicTableInstance) === null || _j === void 0 ? void 0 : _j.props) === null || _k === void 0 ? void 0 : _k.textStyle, this.props.textStyle, (_o = (_m = (_l = this.props) === null || _l === void 0 ? void 0 : _l.dinamicTableInstance) === null || _m === void 0 ? void 0 : _m.props) === null || _o === void 0 ? void 0 : _o.textTitleStyle, this.props.textTitleStyle], numberOfLines: colData.wrap ? 0 : 1 }, this.props.label),
+                    this.props.children),
                 React.createElement(View, { style: {
                         position: "absolute", right: 2, bottom: -2, flexDirection: "row"
                     } },
                     this.renderFilter(),
                     React.createElement(View, { style: { width: 2 } }),
-                    this.renderSorter())),
+                    this.renderSorter(),
+                    React.createElement(View, { style: { width: 2 } }),
+                    this.renderGrouper())),
             React.createElement(View, __assign({}, this.panResponder.panHandlers, { style: {
                     position: "absolute",
                     width: 8,

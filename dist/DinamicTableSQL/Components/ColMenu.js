@@ -225,7 +225,9 @@ var ColMenu = function (props) {
             React.createElement(View, { style: { height: 1, backgroundColor: colors.border } }),
             React.createElement(View, { style: { height: 4 } }),
             React.createElement(Select, { dinamicTableInstance: props.col.props.dinamicTableInstance, defaultValue: search.operator, icon: React.createElement(Assets.Filter, { stroke: colors.accent }), options: OPERADORES[props.col.props.dataType], onSelect: function (e) {
-                    setSearch(__assign(__assign({}, search), { operator: e.value }));
+                    var _a;
+                    var newOp = OPERADORES[props.col.props.dataType].find(function (op) { return op.value === e.value; });
+                    setSearch(__assign(__assign({}, search), { operator: e.value, value: ((_a = newOp === null || newOp === void 0 ? void 0 : newOp.params) !== null && _a !== void 0 ? _a : 1) <= 0 ? [] : search.value }));
                 } }),
             React.createElement(View, { style: { height: 4 } }),
             OP.params ? new Array(OP.params).fill(0).map(function (e, index) {

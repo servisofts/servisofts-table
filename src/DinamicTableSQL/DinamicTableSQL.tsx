@@ -158,27 +158,32 @@ export default class DinamicTableSQL<T> extends React.Component<DinamicTableSQLP
 
 
     loadData = async (reset = true) => {
-        if (!this.props.loadData) throw "DinamicTableSQL: Function loadData is required";
-        if (reset) {
-            this.offset = 0;
-        }
-        const data = await this.props.loadData(this);
-        if (reset) {
-            this.dataFiltrada = data;
-        } else {
-            this.dataFiltrada = [...this.dataFiltrada, ...data];
-        }
-        // this.dataFiltrada = data;
-        this.dataFiltrada.forEach((a, index) => {
-            a.__key = a["__key"] ?? index.toString();
-            return a;
-        })
+        try {
+            if (!this.props.loadData) throw "DinamicTableSQL: Function loadData is required";
+            if (reset) {
+                this.offset = 0;
+            }
+            const data = await this.props.loadData(this);
+            if (reset) {
+                this.dataFiltrada = data;
+            } else {
+                this.dataFiltrada = [...this.dataFiltrada, ...data];
+            }
+            // this.dataFiltrada = data;
+            this.dataFiltrada.forEach((a, index) => {
+                a.__key = a["__key"] ?? index.toString();
+                return a;
+            })
 
-        
-       
-        this.loadSize();
-        this.forceUpdate();
-        console.log("DinamicTableSQL", data);
+
+
+            this.loadSize();
+            this.forceUpdate();
+            console.log("DinamicTableSQL", data);
+        } catch (error) {
+            console.error("Error loading data:", error);
+            throw error;
+        }
     }
 
     loadSize = async () => {
@@ -262,7 +267,7 @@ export default class DinamicTableSQL<T> extends React.Component<DinamicTableSQLP
                 </View>
                 <FlatList
                     ref={ref => this.flatList = ref}
-                    data={this.dataFiltrada.filter(row=>{
+                    data={this.dataFiltrada.filter(row => {
                         if (this.props.filter) {
                             return this.props.filter({ row });
                         }

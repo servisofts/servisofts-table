@@ -24,6 +24,7 @@ export default class ColumConfig extends React.Component<CheckBoxProps> {
                 itemHeight={25}
                 onChange={(items) => {
                     this.props.dinamicTableInstance.cols = items;
+                    this.props.dinamicTableInstance._colWidthVersion++;
                     this.props.dinamicTableInstance.forceUpdate()
                 }}
                 renderItem={({ item, index }) => {
@@ -39,6 +40,7 @@ export default class ColumConfig extends React.Component<CheckBoxProps> {
                         <TouchableOpacity onPress={() => {
                             // this.props.dinamicTableInstance.colData[item.key].wrap = !this.props.dinamicTableInstance.colData[item.key].wrap;
                             this.props.dinamicTableInstance.colData[item.key].hidden = !this.props.dinamicTableInstance.colData[item.key].hidden;
+                            this.props.dinamicTableInstance._colWidthVersion++;
                             this.forceUpdate()
                             this.props.dinamicTableInstance.forceUpdate()
                         }} >

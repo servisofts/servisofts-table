@@ -240,7 +240,7 @@ const ColMenu = (props: { col: Col<any> }) => {
                         }}>
                             <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} />
                             <View style={{ width: 4 }} />
-                            <View style={{ flex: 1 }}>
+                            <View style={{ flex: 1,  }} pointerEvents="none">
                                 {COMPONENT}
                             </View>
                         </TouchableOpacity>
@@ -345,7 +345,8 @@ const ColMenu = (props: { col: Col<any> }) => {
                 defaultValue={search.operator}
                 icon={<Assets.Filter stroke={colors.accent} />}
                 options={OPERADORES[props.col.props.dataType]} onSelect={e => {
-                    setSearch({ ...search, operator: e.value })
+                    const newOp = OPERADORES[props.col.props.dataType].find(op => op.value === e.value);
+                    setSearch({ ...search, operator: e.value, value: (newOp?.params ?? 1) <= 0 ? [] : search.value })
                 }} />
             {/* </View> */}
             <View style={{ height: 4, }} />
@@ -358,6 +359,42 @@ const ColMenu = (props: { col: Col<any> }) => {
             }) : null}
         </>
     }
+    const hanldeGroup = () => {
+        const instance = props.col.props.dinamicTableInstance!;
+        const colId = props.col.props.id ?? "";
+        const existingI = instance.groupers.findIndex(g => g.key == colId);
+        if (existingI >= 0) {
+            instance.groupers.splice(existingI, 1);
+        } else {
+            instance.groupers = [{
+                key: colId,
+                type: props.col.props.dataType,
+                dateFormat: props.col.props.dateFormat,
+            }];
+        }
+        instance.popup!.close("colMenu");
+        instance.applyGroup();
+    }
+
+    const RenderGrouper = () => {
+        if (!!(props.col.props as any).disableGrouper) return null;
+        const isGrouped = props.col.props.dinamicTableInstance!.groupers.some(g => g.key == props.col.props.id);
+        const ListIcon = Assets.List as any;
+        return <>
+            <TouchableOpacity onPress={hanldeGroup} style={{ flexDirection: "row", alignItems: "center" }}>
+                <ListIcon width={16} height={16} stroke={colors.accent} />
+                <View style={{ width: 2 }} />
+                <Text numberOfLines={1} style={{ color: colors.text, fontSize: 12 }}>
+                    {isGrouped
+                        ? SLanguage.select({ en: "Remove group", es: "Quitar agrupación" })
+                        : SLanguage.select({ en: "Group by", es: "Agrupar por" })
+                    }
+                </Text>
+            </TouchableOpacity>
+            <View style={{ height: 4 }} />
+        </>
+    }
+
     const RenderSorter = () => {
         if (!!props.col.props.disableSorter) return null;
         return <>
@@ -411,6 +448,7 @@ const ColMenu = (props: { col: Col<any> }) => {
             }</Text>
         </TouchableOpacity>
         <View style={{ height: 8 }} />
+        {RenderGrouper()}
         {RenderSorter()}
         {RenderFilterInput()}
         {RenderFilterList()}

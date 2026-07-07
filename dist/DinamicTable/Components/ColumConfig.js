@@ -33,6 +33,7 @@ var ColumConfig = /** @class */ (function (_super) {
             } },
             React.createElement(DraggableList, { data: columns, itemHeight: 25, onChange: function (items) {
                     _this.props.dinamicTableInstance.cols = items;
+                    _this.props.dinamicTableInstance._colWidthVersion++;
                     _this.props.dinamicTableInstance.forceUpdate();
                 }, renderItem: function (_a) {
                     var _b;
@@ -46,6 +47,7 @@ var ColumConfig = /** @class */ (function (_super) {
                         React.createElement(TouchableOpacity, { onPress: function () {
                                 // this.props.dinamicTableInstance.colData[item.key].wrap = !this.props.dinamicTableInstance.colData[item.key].wrap;
                                 _this.props.dinamicTableInstance.colData[item.key].hidden = !_this.props.dinamicTableInstance.colData[item.key].hidden;
+                                _this.props.dinamicTableInstance._colWidthVersion++;
                                 _this.forceUpdate();
                                 _this.props.dinamicTableInstance.forceUpdate();
                             } },

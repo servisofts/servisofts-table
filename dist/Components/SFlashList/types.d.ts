@@ -11,4 +11,5 @@ export interface SFlashListProps {
     }) => any;
     keyExtractor?: ((item: any, index: number) => string) | undefined;
     scrollEnabled?: boolean;
+    getItemSize?: (index: number) => number;
 }

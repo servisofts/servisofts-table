@@ -11,15 +11,11 @@ export default class SFlashList extends Component<SFlashListProps> {
     ref: InstanceType<typeof VariableSizeList> | null;
     private _renderItem;
     private _data;
-    private _itemHeights;
-    private _minChangedIndex;
-    private _scheduledReset;
     _RowItem: ({ index, style }: {
         index: number;
         style: React.CSSProperties;
     }) => JSX.Element;
     componentDidUpdate(prevProps: SFlashListProps): void;
-    componentWillUnmount(): void;
     resetAfterIndex(index: number, shouldForceUpdate?: boolean): void;
     scrollToOffset(e: {
         offset: number;

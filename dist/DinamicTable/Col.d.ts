@@ -46,6 +46,7 @@ export type ColPropsType<T> = {
     disableFilterGroup?: boolean;
     disableFilter?: boolean;
     disableSorter?: boolean;
+    disableGrouper?: boolean;
     disableExport?: boolean;
     excelFormat?: string;
     sumExcel?: boolean;
@@ -73,13 +74,17 @@ export default class Col<T> extends React.Component<ColPropsType<T>> {
         width: number;
         wrap: boolean;
     };
-    state: {};
+    state: {
+        isResizing: boolean;
+    };
     widthAnim: Animated.Value;
     currentWidth: number;
     startX: number;
     panResponder: import("react-native").PanResponderInstance;
+    componentDidUpdate(): void;
     showPopup(evt: any): void;
     renderFilter(): JSX.Element;
     renderSorter(): JSX.Element;
+    renderGrouper(): JSX.Element;
     render(): JSX.Element;
 }
