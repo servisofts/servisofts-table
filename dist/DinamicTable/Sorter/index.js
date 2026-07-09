@@ -21,7 +21,7 @@ var Sorter = /** @class */ (function () {
                         compareResult = valueA - valueB;
                         break;
                     case 'string':
-                        compareResult = valueA.localeCompare(valueB);
+                        compareResult = String(valueA).localeCompare(String(valueB));
                         break;
                     case 'boolean':
                         compareResult = Number(valueA) - Number(valueB);

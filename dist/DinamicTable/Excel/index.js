@@ -50,9 +50,12 @@ var Excel = /** @class */ (function () {
                     return [2 /*return*/];
                 }
                 headers = props.dinamicTableInstance.cols.filter(function (col) { return !col.props.disableExport; }).map(function (col) { return col.key; });
-                headersName = props.dinamicTableInstance.cols.filter(function (col) { return !col.props.disableExport; }).map(function (col) { var _a, _b; return (_b = ((_a = col.props) === null || _a === void 0 ? void 0 : _a.label)) !== null && _b !== void 0 ? _b : col.key; });
+                headersName = props.dinamicTableInstance.cols.filter(function (col) { return !col.props.disableExport; }).map(function (col) { var _a; return (typeof ((_a = col.props) === null || _a === void 0 ? void 0 : _a.label) === "string" ? col.props.label : col.key); });
                 dataRows = dataFiltrada.map(function (row) {
-                    return headers.map(function (header) { return row[header]; });
+                    return headers.map(function (header) {
+                        var value = row[header];
+                        return Array.isArray(value) ? value.join(', ') : value;
+                    });
                 });
                 // Convertir los datos a formato de hoja de cálculo
                 console.log(dataFiltrada);
@@ -67,7 +70,10 @@ var Excel = /** @class */ (function () {
                     var colLetter = utils.encode_col(i);
                     var firstDataRow = 2; // Fila donde empiezan los datos en Excel (1-based)
                     var lastDataRow = firstDataRow + dataRows.length - 1;
+                    var sum = dataRows.reduce(function (acc, r) { return acc + (Number(r[i]) || 0); }, 0);
                     return {
+                        v: sum,
+                        t: 'n',
                         f: "SUM(".concat(colLetter).concat(firstDataRow, ":").concat(colLetter).concat(lastDataRow, ")"),
                         s: {
                             font: { bold: true },

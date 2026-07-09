@@ -75,6 +75,22 @@ const ColMenu = (props: { col: Col<any> }) => {
         value: [],
         ...filtro
     } as FilterType)
+    const commitFilter = (newSearch: FilterType) => {
+        setSearch(newSearch)
+        const instance = props.col.props.dinamicTableInstance;
+        const OP = OPERADORES[props.col.props.dataType].find(e => e.value == newSearch.operator);
+        const filtroI = instance.filtros.findIndex(e => e.col == props.col.props.id)
+        if (newSearch.value.length > 0 || (OP?.params ?? 1) <= 0) {
+            if (filtroI >= 0) {
+                instance.filtros[filtroI] = newSearch
+            } else {
+                instance.filtros.push(newSearch)
+            }
+        } else if (filtroI >= 0) {
+            instance.filtros.splice(filtroI, 1)
+        }
+        instance.applyFilter()
+    }
     // const searchRef = React.useRef(search);
 
     // useEffect(() => {
@@ -92,6 +108,7 @@ const ColMenu = (props: { col: Col<any> }) => {
             let dataFormat = props.col.props.dinamicTableInstance.dataFormat;
             let dataFilter: any = await Filter.filterData(dataFormat, props.col.props.dinamicTableInstance.filtros.slice(0, maxIndex))
             const rows = [];
+            const sortKeys: string[] = [];
             const groups = dataFilter.reduce((acc, row, index) => {
                 let value = row[props.col.props.id];
                 if (!value) return acc;
@@ -103,20 +120,28 @@ const ColMenu = (props: { col: Col<any> }) => {
                     }
                 }
                 if (Array.isArray(value)) {
+                    // Array-valued columns (eg. tags/tipos) can't be represented by a
+                    // single row: a row with several values would otherwise render ALL
+                    // its values every time any one of them is newly discovered. Push a
+                    // lightweight marker for just this single value instead.
                     value.map(e => {
                         if (!acc.includes(e)) {
-                            rows.push(row)
                             acc.push(e)
+                            rows.push({ __arrayFilterValue: e })
+                            sortKeys.push(String(e))
                         }
                     })
                 } else if (!acc.includes(value)) {
                     rows.push(row)
+                    sortKeys.push(String(value))
                     acc.push(value)
                 }
                 return acc;
             }, [] as any[])
-            // console.log("rows", groups);
-            setList(rows)
+            // Sort alphabetically (ascending) so long option lists are quick to scan/search.
+            const order = rows.map((_, i) => i)
+                .sort((a, b) => sortKeys[a].localeCompare(sortKeys[b], undefined, { numeric: true, sensitivity: "base" }))
+            setList(order.map(i => rows[i]))
         }
 
         formatData()
@@ -134,7 +159,26 @@ const ColMenu = (props: { col: Col<any> }) => {
         //         props.col.props.dinamicTableInstance.applyFilter()
         //     }
         // }
-    }, [])
+
+        // Recompute when the popup targets a different column: the popup is reused
+        // across columns (same "colMenu" key in Popup.tsx) instead of being remounted,
+        // so without this dependency the list stays frozen from whichever column
+        // opened the popup first.
+    }, [props.col.props.id])
+
+    useEffect(() => {
+        setSearch({
+            col: props.col.props.id,
+            type: props.col.props.dataType,
+            operator: "contains",
+            dateFormat: props.col.props.dateFormat,
+            value: [],
+            ...filtro
+        } as FilterType)
+        // Same reuse issue as above: reset the search/filter state when switching
+        // to a different column so stale values/operator from the previous column
+        // don't leak in.
+    }, [props.col.props.id])
 
     const hanldeSort = (order) => {
         const sorters = props.col.props.dinamicTableInstance.sorter;
@@ -183,6 +227,30 @@ const ColMenu = (props: { col: Col<any> }) => {
                     contentContainerStyle={{ padding: 4, paddingBottom: 40 }}
                     ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
                     renderItem={({ item, index }) => {
+                        if (item && item.__arrayFilterValue !== undefined) {
+                            const value = item.__arrayFilterValue;
+                            const styleText = StyleSheet.flatten([{ color: colors.text }, props.col.props.dinamicTableInstance.props.textStyle, props.col.props.textStyle])
+                            const isCheck = search.value.includes(value);
+                            return <TouchableOpacity style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                            }} onPress={() => {
+                                if (!Array.isArray(search.value)) {
+                                    search.value = []
+                                }
+                                if (isCheck) {
+                                    commitFilter({ ...search, value: search.value.filter(e => e != value) })
+                                } else {
+                                    commitFilter({ ...search, value: [...search.value, value] })
+                                }
+                            }}>
+                                <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} />
+                                <View style={{ width: 4 }} />
+                                <View style={{ flex: 1, }} pointerEvents="none">
+                                    <Text numberOfLines={1} style={[styleText]}>{value}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        }
                         let COMPONENT = null;
 
                         const colData = props.col.props.dinamicTableInstance.colData[props.col.props.id];
@@ -224,18 +292,10 @@ const ColMenu = (props: { col: Col<any> }) => {
 
 
                             if (isCheck) {
-                                setSearch({ ...search, value: search.value.filter(e => e != data.toString()) })
+                                commitFilter({ ...search, value: search.value.filter(e => e != data.toString()) })
                             } else {
-                                setSearch({ ...search, value: [...search.value, data.toString()] })
+                                commitFilter({ ...search, value: [...search.value, data.toString()] })
                             }
-                            // props.col.props.dinamicTableInstance.filtros.push({
-                            //     col: props.col.props.id,
-                            //     type: props.col.props.dataType,
-                            //     operator: "=",
-                            //     value: item[props.col.props.id]
-                            // })
-                            // props.col.props.dinamicTableInstance.applyFilter()
-                            // props.col.props.dinamicTableInstance?.popup?.close("colMenu")
 
                         }}>
                             <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} />
@@ -431,7 +491,7 @@ const ColMenu = (props: { col: Col<any> }) => {
         borderWidth: 1,
         borderColor: colors.border
     }}>
-        <Text style={{ color: colors.text, fontWeight: "bold", textAlign: "center", fontSize: 12, }}  >{props?.col?.props?.label ?? props?.col?.props?.id}</Text>
+        <Text style={{ color: colors.text, fontWeight: "bold", textAlign: "center", fontSize: 12, }}  >{typeof props?.col?.props?.label === "string" ? props.col.props.label : props?.col?.props?.id}</Text>
         <View style={{ height: 8 }} />
         <TouchableOpacity onPress={() => {
             props.col.props.dinamicTableInstance.colData[props.col.props.id].wrap = !props.col.props.dinamicTableInstance.colData[props.col.props.id].wrap;

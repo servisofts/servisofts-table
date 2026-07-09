@@ -25,7 +25,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 import React from "react";
-import { Animated, PanResponder, Text, TouchableOpacity, View } from "react-native";
+import { Animated, PanResponder, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 // import { FilterType,  } from "./Filter";
 import ColMenu from "./Components/ColMenu";
 import Assets from "../Assets";
@@ -114,7 +114,7 @@ var Col = /** @class */ (function (_super) {
     };
     Col.prototype.render = function () {
         var _this = this;
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
         var colors = this.props.dinamicTableInstance.colors;
         var colData = (_b = (_a = this.props.dinamicTableInstance) === null || _a === void 0 ? void 0 : _a.colData) === null || _b === void 0 ? void 0 : _b[this.props.id];
         // Use widthAnim for smooth resizing, but sync with adjusted width when not resizing
@@ -125,6 +125,25 @@ var Col = /** @class */ (function (_super) {
         var isFirstColumn = visibleCols.length > 0 && visibleCols[0].key === this.props.id && !hasCheckCol;
         var isLastColumn = visibleCols.length > 0 && visibleCols[visibleCols.length - 1].key === this.props.id;
         var borderRadius = 8; // You can make this configurable later
+        var sumTotalText = "";
+        if (this.props.sumTotal) {
+            var rows = ((_f = (_e = this.props.dinamicTableInstance) === null || _e === void 0 ? void 0 : _e.dataFiltrada) !== null && _f !== void 0 ? _f : []).map(function (item) { return item.__original; });
+            if (typeof this.props.sumTotal === "function") {
+                sumTotalText = (_g = this.props.sumTotal(rows)) !== null && _g !== void 0 ? _g : "";
+            }
+            else {
+                var total = rows.reduce(function (s, row) { return s + (Number(_this.props.data({ row: row, index: 0 })) || 0); }, 0);
+                if (Array.isArray(this.props.sumTotal)) {
+                    var _y = this.props.sumTotal, prefix = _y[0], decimals = _y[1];
+                    sumTotalText = "".concat(prefix !== null && prefix !== void 0 ? prefix : "", " ").concat(total.toFixed(decimals !== null && decimals !== void 0 ? decimals : 0)).trim();
+                }
+                else {
+                    sumTotalText = this.props.format
+                        ? this.props.format({ data: total, row: null, index: -1, textStyle: { color: colors.text } })
+                        : String(total);
+                }
+            }
+        }
         return React.createElement(View, { style: { flexDirection: "row", alignItems: "center" } },
             React.createElement(Animated.View, { style: [
                     {
@@ -141,16 +160,24 @@ var Col = /** @class */ (function (_super) {
                         borderTopLeftRadius: isFirstColumn ? borderRadius : 0,
                         borderTopRightRadius: isLastColumn ? borderRadius : 0
                     },
-                    (_g = (_f = (_e = this.props) === null || _e === void 0 ? void 0 : _e.dinamicTableInstance) === null || _f === void 0 ? void 0 : _f.props) === null || _g === void 0 ? void 0 : _g.cellStyle,
+                    (_k = (_j = (_h = this.props) === null || _h === void 0 ? void 0 : _h.dinamicTableInstance) === null || _j === void 0 ? void 0 : _j.props) === null || _k === void 0 ? void 0 : _k.cellStyle,
                     this.props.headerStyle,
                 ] },
-                React.createElement(TouchableOpacity, { onPress: this.showPopup.bind(this), style: __assign({ width: "100%", flex: 1, justifyContent: "center", alignItems: "center", flexDirection: "row" }, this.props.headerStyle ? {
+                React.createElement(TouchableOpacity, { onPress: this.showPopup.bind(this), style: __assign(__assign({ width: "100%", flex: 1, justifyContent: "center", alignItems: "center", flexDirection: "row", overflow: "hidden", paddingHorizontal: 4 }, this.props.headerStyle ? {
                         justifyContent: this.props.headerStyle.justifyContent,
                         alignItems: this.props.headerStyle.alignItems
-                    } : {}) },
-                    this.props.labelIcon,
-                    this.props.labelIcon && this.props.label ? React.createElement(View, { style: { width: 8 } }) : null,
-                    React.createElement(Text, { style: [{ color: colors.text, overflow: "hidden", flexWrap: "wrap", textAlign: "center" }, (_k = (_j = (_h = this.props) === null || _h === void 0 ? void 0 : _h.dinamicTableInstance) === null || _j === void 0 ? void 0 : _j.props) === null || _k === void 0 ? void 0 : _k.textStyle, this.props.textStyle, (_o = (_m = (_l = this.props) === null || _l === void 0 ? void 0 : _l.dinamicTableInstance) === null || _m === void 0 ? void 0 : _m.props) === null || _o === void 0 ? void 0 : _o.textTitleStyle, this.props.textTitleStyle], numberOfLines: colData.wrap ? 0 : 1 }, this.props.label),
+                    } : {}), this.props.sumTotal ? { justifyContent: "space-between" } : {}) },
+                    this.props.customHeaderComponent ? (this.props.customHeaderComponent({
+                        label: this.props.label,
+                        sumTotal: this.props.sumTotal ? sumTotalText : undefined,
+                        textStyle: StyleSheet.flatten([{ color: colors.text }, (_o = (_m = (_l = this.props) === null || _l === void 0 ? void 0 : _l.dinamicTableInstance) === null || _m === void 0 ? void 0 : _m.props) === null || _o === void 0 ? void 0 : _o.textStyle, this.props.textStyle]),
+                        colors: colors,
+                        dinamicTable: this.props.dinamicTableInstance
+                    })) : (React.createElement(React.Fragment, null,
+                        this.props.labelIcon,
+                        this.props.labelIcon && this.props.label ? React.createElement(View, { style: { width: 8 } }) : null,
+                        typeof this.props.label === "string" || this.props.label === undefined ? (React.createElement(Text, { style: [{ color: colors.text, overflow: "hidden", flexWrap: "wrap", textAlign: "center", flexShrink: 1, minWidth: 0 }, (_r = (_q = (_p = this.props) === null || _p === void 0 ? void 0 : _p.dinamicTableInstance) === null || _q === void 0 ? void 0 : _q.props) === null || _r === void 0 ? void 0 : _r.textStyle, this.props.textStyle, (_u = (_t = (_s = this.props) === null || _s === void 0 ? void 0 : _s.dinamicTableInstance) === null || _t === void 0 ? void 0 : _t.props) === null || _u === void 0 ? void 0 : _u.textTitleStyle, this.props.textTitleStyle], numberOfLines: colData.wrap ? 0 : 1 }, this.props.label)) : this.props.label,
+                        this.props.sumTotal ? (React.createElement(Text, { numberOfLines: 1, style: [{ color: colors.text, fontWeight: "bold", flexShrink: 1, minWidth: 0 }, (_x = (_w = (_v = this.props) === null || _v === void 0 ? void 0 : _v.dinamicTableInstance) === null || _w === void 0 ? void 0 : _w.props) === null || _x === void 0 ? void 0 : _x.textStyle, this.props.textStyle] }, sumTotalText)) : null)),
                     this.props.children),
                 React.createElement(View, { style: {
                         position: "absolute", right: 2, bottom: -2, flexDirection: "row"

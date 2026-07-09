@@ -37,7 +37,10 @@ export default class Excel {
             const colLetter = utils.encode_col(i);
             const firstDataRow = 3; // Fila donde empiezan los datos en Excel (1-based)
             const lastDataRow = firstDataRow + dataRows.length - 1;
+            const sum = dataRows.reduce((acc, r) => acc + (Number(r[i]) || 0), 0);
             return {
+                v: sum,
+                t: 'n',
                 f: `SUM(${colLetter}${firstDataRow}:${colLetter}${lastDataRow})`,
                 s: {
                     font: { bold: true },

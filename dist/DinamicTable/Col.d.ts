@@ -3,7 +3,7 @@ import { Animated, TextStyle, ViewStyle } from "react-native";
 import DinamicTable, { CellStyle, ColData } from "./DinamicTable";
 import { DataType } from ".";
 export type ColPropsType<T> = {
-    label?: string;
+    label?: string | React.ReactElement;
     labelIcon?: any;
     dataType: DataType;
     dateFormat?: string;
@@ -50,6 +50,7 @@ export type ColPropsType<T> = {
     disableExport?: boolean;
     excelFormat?: string;
     sumExcel?: boolean;
+    sumTotal?: boolean | [string, number] | ((rows: T[]) => string);
     usePermission?: (props: {
         data: any;
         row: T;
@@ -67,6 +68,13 @@ export type ColPropsType<T> = {
         dinamicTable: DinamicTable<T>;
     }) => any;
     headerStyle?: ViewStyle;
+    customHeaderComponent?: (props: {
+        label?: string | React.ReactElement;
+        sumTotal?: string;
+        textStyle: TextStyle;
+        colors: any;
+        dinamicTable: DinamicTable<T>;
+    }) => any;
 };
 export default class Col<T> extends React.Component<ColPropsType<T>> {
     static defaultProps: {

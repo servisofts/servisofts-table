@@ -118,18 +118,19 @@ const OPERATORS_FUNCTIONS: { [key: string]: (data: any, value: any, filtro: Filt
     },
     [OPERATORS.CONTAINS]: (data, value, filtro) => {
         if (!data) return false;
-        if (!data) return false;
+        const str = (Array.isArray(data) ? data.join(",") : data.toString()).toUpperCase();
         if (Array.isArray(filtro.value)) {
-            return filtro.value.some((value) => (data).toUpperCase().includes(value.toUpperCase()));
+            return filtro.value.some((value) => str.includes(value.toUpperCase()));
         }
-        return data.toString().toUpperCase().includes(value.toUpperCase())
+        return str.includes(value.toUpperCase())
     },
     [OPERATORS.NO_CONTAINS]: (data, value, filtro) => {
         if (!data) return false;
+        const str = (Array.isArray(data) ? data.join(",") : data.toString()).toUpperCase();
         if (Array.isArray(filtro.value)) {
-            return filtro.value.some((value) => !(data).toUpperCase().includes(value.toUpperCase()));
+            return filtro.value.some((value) => !str.includes(value.toUpperCase()));
         }
-        return !data.toString().toUpperCase().includes(value.toUpperCase())
+        return !str.includes(value.toUpperCase())
     },
     
     [OPERATORS.STARTS_WITH]: (data, value) => {

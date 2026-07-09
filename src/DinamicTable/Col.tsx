@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Animated, FlatList, PanResponder, Text, TextInput, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native";
+import { Animated, FlatList, PanResponder, StyleSheet, Text, TextInput, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native";
 import DinamicTable, { CellStyle, ColData } from "./DinamicTable";
 import { DataType } from ".";
 // import { FilterType,  } from "./Filter";
@@ -9,7 +9,7 @@ import Assets from "../Assets";
 
 
 export type ColPropsType<T> = {
-    label?: string,
+    label?: string | React.ReactElement,
     labelIcon?: any,
     dataType: DataType,
     dateFormat?: string,
@@ -32,10 +32,12 @@ export type ColPropsType<T> = {
     disableExport?: boolean,
     excelFormat?: string,
     sumExcel?: boolean,
+    sumTotal?: boolean | [string, number] | ((rows: T[]) => string),
     usePermission?: (props: { data: any, row: T, index: number, textStyle: TextStyle, dinamicTable: DinamicTable<T>, colData: ColData }) => boolean,
     footerComponent?: (props: { textStyle: TextStyle, dinamicTable: DinamicTable<T> }) => any,
     listFooterComponent?: (props: { textStyle: TextStyle, dinamicTable: DinamicTable<T> }) => any,
     headerStyle?: ViewStyle,
+    customHeaderComponent?: (props: { label?: string | React.ReactElement, sumTotal?: string, textStyle: TextStyle, colors: any, dinamicTable: DinamicTable<T> }) => any,
 }
 
 export default class Col<T> extends React.Component<ColPropsType<T>> {
@@ -142,6 +144,24 @@ export default class Col<T> extends React.Component<ColPropsType<T>> {
 
         const borderRadius = 8; // You can make this configurable later
 
+        let sumTotalText = "";
+        if (this.props.sumTotal) {
+            const rows = (this.props.dinamicTableInstance?.dataFiltrada ?? []).map((item: any) => item.__original);
+            if (typeof this.props.sumTotal === "function") {
+                sumTotalText = this.props.sumTotal(rows) ?? "";
+            } else {
+                const total = rows.reduce((s: number, row: any) => s + (Number(this.props.data({ row, index: 0 })) || 0), 0);
+                if (Array.isArray(this.props.sumTotal)) {
+                    const [prefix, decimals] = this.props.sumTotal;
+                    sumTotalText = `${prefix ?? ""} ${total.toFixed(decimals ?? 0)}`.trim();
+                } else {
+                    sumTotalText = this.props.format
+                        ? this.props.format({ data: total, row: null as any, index: -1, textStyle: { color: colors.text } })
+                        : String(total);
+                }
+            }
+        }
+
         return <View style={{ flexDirection: "row", alignItems: "center", }}>
             <Animated.View
                 style={[
@@ -165,18 +185,40 @@ export default class Col<T> extends React.Component<ColPropsType<T>> {
             >
                 <TouchableOpacity onPress={this.showPopup.bind(this)} style={{
                     width: "100%", flex: 1, justifyContent: "center", alignItems: "center", flexDirection: "row",
+                    overflow: "hidden",
+                    paddingHorizontal: 4,
                     ...this.props.headerStyle ? {
                         justifyContent: this.props.headerStyle.justifyContent,
                         alignItems: this.props.headerStyle.alignItems,
-                    } : {}
+                    } : {},
+                    ...this.props.sumTotal ? { justifyContent: "space-between" } : {}
                 }}>
-                    {this.props.labelIcon}
-                    {this.props.labelIcon && this.props.label ? <View style={{ width: 8 }} /> : null}
-                    <Text style={[{ color: colors.text, overflow: "hidden", flexWrap: "wrap", textAlign: "center" }, this.props?.dinamicTableInstance?.props?.textStyle, this.props.textStyle, this.props?.dinamicTableInstance?.props?.textTitleStyle, this.props.textTitleStyle]}
-                        numberOfLines={colData.wrap ? 0 : 1}
-                    >
-                        {this.props.label}
-                    </Text>
+                    {this.props.customHeaderComponent ? (
+                        this.props.customHeaderComponent({
+                            label: this.props.label,
+                            sumTotal: this.props.sumTotal ? sumTotalText : undefined,
+                            textStyle: StyleSheet.flatten([{ color: colors.text }, this.props?.dinamicTableInstance?.props?.textStyle, this.props.textStyle]),
+                            colors,
+                            dinamicTable: this.props.dinamicTableInstance,
+                        })
+                    ) : (
+                        <>
+                            {this.props.labelIcon}
+                            {this.props.labelIcon && this.props.label ? <View style={{ width: 8 }} /> : null}
+                            {typeof this.props.label === "string" || this.props.label === undefined ? (
+                                <Text style={[{ color: colors.text, overflow: "hidden", flexWrap: "wrap", textAlign: "center", flexShrink: 1, minWidth: 0 }, this.props?.dinamicTableInstance?.props?.textStyle, this.props.textStyle, this.props?.dinamicTableInstance?.props?.textTitleStyle, this.props.textTitleStyle]}
+                                    numberOfLines={colData.wrap ? 0 : 1}
+                                >
+                                    {this.props.label}
+                                </Text>
+                            ) : this.props.label}
+                            {this.props.sumTotal ? (
+                                <Text numberOfLines={1} style={[{ color: colors.text, fontWeight: "bold", flexShrink: 1, minWidth: 0 }, this.props?.dinamicTableInstance?.props?.textStyle, this.props.textStyle]}>
+                                    {sumTotalText}
+                                </Text>
+                            ) : null}
+                        </>
+                    )}
                     {this.props.children}
                 </TouchableOpacity>
 

@@ -51,6 +51,12 @@ export type ExporterStateType = {
     cols?: { [key: string]: ColData },
     groupers?: GrouperType[],
 }
+export type HeaderGroupType = {
+    label: string,
+    cols: string[],
+    style?: ViewStyle,
+    textStyle?: TextStyle,
+}
 type DinamicTablePropsType<T> = {
     loadData: () => Promise<T[]>,
     loadInitialState?: () => Promise<ExporterStateType>,
@@ -80,6 +86,7 @@ type DinamicTablePropsType<T> = {
     renderLoading?: (p: { dinamicTable: DinamicTable<T> }) => ReactElement,
     renderHeaderActions?: (p: { dinamicTable: DinamicTable<T> }) => ReactElement | null,
     onSelectionChange?: (rows: T[]) => void,
+    headerGroups?: HeaderGroupType[],
 
 }
 
@@ -410,7 +417,7 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
                         }
                         break;
                     case "string":
-                        data = data + ""
+                        data = Array.isArray(data) ? data : data + ""
                         break;
                     case "date":
                         if (!!data) {
@@ -524,6 +531,58 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
         return <Text style={{ color: this.colors.text, fontSize: 12 }}>{"Resultados: " + this.dataFiltrada.length + " de " + this.dataFormat.length}</Text>
     }
 
+    private renderHeaderGroups() {
+        const groups = this.props.headerGroups;
+        if (!groups || groups.length === 0) return null;
+
+        const visibleCols = this.cols.filter(a => !this.colData[a.key as string].hidden);
+        const keyToGroupIndex: { [key: string]: number } = {};
+        groups.forEach((g, gi) => g.cols.forEach(k => { keyToGroupIndex[k] = gi; }));
+
+        const runs: { refKey: string, label?: string, width: number, style?: ViewStyle, textStyle?: TextStyle }[] = [];
+        let i = 0;
+        while (i < visibleCols.length) {
+            const colKey = String(visibleCols[i].key);
+            const gi = keyToGroupIndex[colKey];
+            if (gi === undefined) {
+                runs.push({ refKey: colKey, width: this.getAdjustedColumnWidth(colKey) });
+                i++;
+                continue;
+            }
+            let width = 0;
+            let j = i;
+            while (j < visibleCols.length && keyToGroupIndex[String(visibleCols[j].key)] === gi) {
+                width += this.getAdjustedColumnWidth(String(visibleCols[j].key));
+                j++;
+            }
+            runs.push({ refKey: `group-${gi}-${colKey}`, label: groups[gi].label, width, style: groups[gi].style, textStyle: groups[gi].textStyle });
+            i = j;
+        }
+
+        return (
+            <View style={{ flexDirection: "row" }}>
+                {this.props.selectType === "check" && <View style={{ width: CHECK_COL_WIDTH }} />}
+                {runs.map(r => (
+                    <View key={r.refKey} style={[{
+                        width: r.width,
+                        height: 28,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderBottomWidth: r.label ? 0.5 : 0,
+                        borderColor: this.colors.border,
+                        backgroundColor: r.label ? this.colors.header : "transparent",
+                    }, r.style]}>
+                        {r.label ? (
+                            <Text numberOfLines={1} style={[{ color: this.colors.text, fontWeight: "bold", fontSize: 11 }, this.props.textStyle, r.textStyle]}>
+                                {r.label}
+                            </Text>
+                        ) : null}
+                    </View>
+                ))}
+            </View>
+        );
+    }
+
     private renderColumnHeaders() {
         return (
             <View style={{ flexDirection: "row" }}>
@@ -621,7 +680,7 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
                 ? this.props.renderLoading({ dinamicTable: this })
                 : <View style={{ width: "100%", padding: 8 }}>
                     <Text style={this.textStyle}>{SLanguage.select({ en: "Loading data... please wait.", es: "Cargando datos... por favor espera." })}</Text>
-                  </View>;
+                </View>;
         }
         if (this.state.state === "error") {
             return this.props.renderError
@@ -629,14 +688,14 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
                 : <View style={{ width: "100%", padding: 8 }}>
                     <Text style={this.textStyle}>{SLanguage.select({ en: "An error occurred while loading data.", es: "Ocurrió un error al cargar los datos." })}</Text>
                     <Text style={this.textStyle}>{JSON.stringify(this.state.error)}</Text>
-                  </View>;
+                </View>;
         }
         if (this.state.state === "ready" && this.dataFiltrada.length <= 0) {
             return this.props.renderNoResults
                 ? this.props.renderNoResults({ dinamicTable: this })
                 : <View style={{ width: "100%", padding: 8 }}>
                     <Text style={this.textStyle}>{SLanguage.select({ es: "No se encontraron resultados.", en: "No results found." })}</Text>
-                  </View>;
+                </View>;
         }
         return null;
     }
@@ -676,6 +735,7 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
                             const h = e.nativeEvent.layout.height;
                             if (h !== this._webHeaderHeight) { this._webHeaderHeight = h; this.forceUpdate(); }
                         }}>
+                            {this.renderHeaderGroups()}
                             {this.renderColumnHeaders()}
                         </View>
                         {this.renderStates()}
@@ -738,6 +798,7 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
                     paddingBottom: 0,
                 }}
             >
+                {this.renderHeaderGroups()}
                 {this.renderColumnHeaders()}
                 {this.renderStates()}
                 {this.state.state === "ready" && this.dataFiltrada.length > 0 &&

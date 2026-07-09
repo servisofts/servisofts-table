@@ -19,10 +19,13 @@ export default class Excel {
         // Obtener las claves del primer objeto como encabezados
 
         const headers = props.dinamicTableInstance.cols.filter(col => !(col.props as any as ColPropsType<any>).disableExport).map(col => col.key)
-        const headersName = props.dinamicTableInstance.cols.filter(col => !(col.props as any as ColPropsType<any>).disableExport).map(col => ((col.props as any)?.label) ?? col.key)
+        const headersName = props.dinamicTableInstance.cols.filter(col => !(col.props as any as ColPropsType<any>).disableExport).map(col => (typeof (col.props as any)?.label === "string" ? (col.props as any).label : col.key))
 
         const dataRows = dataFiltrada.map(row =>
-            headers.map(header => row[header])
+            headers.map(header => {
+                const value = row[header];
+                return Array.isArray(value) ? value.join(', ') : value;
+            })
         );
 
         // Convertir los datos a formato de hoja de cálculo
@@ -40,7 +43,10 @@ export default class Excel {
             const colLetter = utils.encode_col(i);
             const firstDataRow = 2; // Fila donde empiezan los datos en Excel (1-based)
             const lastDataRow = firstDataRow + dataRows.length - 1;
+            const sum = dataRows.reduce((acc, r) => acc + (Number(r[i]) || 0), 0);
             return {
+                v: sum,
+                t: 'n',
                 f: `SUM(${colLetter}${firstDataRow}:${colLetter}${lastDataRow})`,
                 s: {
                     font: { bold: true },

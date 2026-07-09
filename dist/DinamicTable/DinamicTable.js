@@ -434,7 +434,7 @@ var DinamicTable = /** @class */ (function (_super) {
                                 }
                                 break;
                             case "string":
-                                data = data + "";
+                                data = Array.isArray(data) ? data : data + "";
                                 break;
                             case "date":
                                 if (!!data) {
@@ -573,6 +573,45 @@ var DinamicTable = /** @class */ (function (_super) {
     DinamicTable.prototype.renderCantidadResultados = function () {
         return React.createElement(Text, { style: { color: this.colors.text, fontSize: 12 } }, "Resultados: " + this.dataFiltrada.length + " de " + this.dataFormat.length);
     };
+    DinamicTable.prototype.renderHeaderGroups = function () {
+        var _this = this;
+        var groups = this.props.headerGroups;
+        if (!groups || groups.length === 0)
+            return null;
+        var visibleCols = this.cols.filter(function (a) { return !_this.colData[a.key].hidden; });
+        var keyToGroupIndex = {};
+        groups.forEach(function (g, gi) { return g.cols.forEach(function (k) { keyToGroupIndex[k] = gi; }); });
+        var runs = [];
+        var i = 0;
+        while (i < visibleCols.length) {
+            var colKey = String(visibleCols[i].key);
+            var gi = keyToGroupIndex[colKey];
+            if (gi === undefined) {
+                runs.push({ refKey: colKey, width: this.getAdjustedColumnWidth(colKey) });
+                i++;
+                continue;
+            }
+            var width = 0;
+            var j = i;
+            while (j < visibleCols.length && keyToGroupIndex[String(visibleCols[j].key)] === gi) {
+                width += this.getAdjustedColumnWidth(String(visibleCols[j].key));
+                j++;
+            }
+            runs.push({ refKey: "group-".concat(gi, "-").concat(colKey), label: groups[gi].label, width: width, style: groups[gi].style, textStyle: groups[gi].textStyle });
+            i = j;
+        }
+        return (React.createElement(View, { style: { flexDirection: "row" } },
+            this.props.selectType === "check" && React.createElement(View, { style: { width: CHECK_COL_WIDTH } }),
+            runs.map(function (r) { return (React.createElement(View, { key: r.refKey, style: [{
+                        width: r.width,
+                        height: 28,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderBottomWidth: r.label ? 0.5 : 0,
+                        borderColor: _this.colors.border,
+                        backgroundColor: r.label ? _this.colors.header : "transparent"
+                    }, r.style] }, r.label ? (React.createElement(Text, { numberOfLines: 1, style: [{ color: _this.colors.text, fontWeight: "bold", fontSize: 11 }, _this.props.textStyle, r.textStyle] }, r.label)) : null)); })));
+    };
     DinamicTable.prototype.renderColumnHeaders = function () {
         var _this = this;
         return (React.createElement(View, { style: { flexDirection: "row" } },
@@ -688,7 +727,9 @@ var DinamicTable = /** @class */ (function (_super) {
                                 _this._webHeaderHeight = h;
                                 _this.forceUpdate();
                             }
-                        } }, this.renderColumnHeaders()),
+                        } },
+                        this.renderHeaderGroups(),
+                        this.renderColumnHeaders()),
                     this.renderStates(),
                     hasData && listHeight > 0 && (React.createElement(View, { style: { height: listHeight } },
                         React.createElement(SFlashList, { ref: function (ref) { _this._sFlashRef = ref; }, estimatedItemSize: ROW_HEIGHT, getItemSize: function (index) {
@@ -727,6 +768,7 @@ var DinamicTable = /** @class */ (function (_super) {
                 paddingTop: 0,
                 paddingBottom: 0
             } },
+            this.renderHeaderGroups(),
             this.renderColumnHeaders(),
             this.renderStates(),
             this.state.state === "ready" && this.dataFiltrada.length > 0 &&

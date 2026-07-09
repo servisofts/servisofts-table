@@ -153,20 +153,20 @@ var OPERATORS_FUNCTIONS = (_a = {},
     _a[OPERATORS.CONTAINS] = function (data, value, filtro) {
         if (!data)
             return false;
-        if (!data)
-            return false;
+        var str = (Array.isArray(data) ? data.join(",") : data.toString()).toUpperCase();
         if (Array.isArray(filtro.value)) {
-            return filtro.value.some(function (value) { return (data).toUpperCase().includes(value.toUpperCase()); });
+            return filtro.value.some(function (value) { return str.includes(value.toUpperCase()); });
         }
-        return data.toString().toUpperCase().includes(value.toUpperCase());
+        return str.includes(value.toUpperCase());
     },
     _a[OPERATORS.NO_CONTAINS] = function (data, value, filtro) {
         if (!data)
             return false;
+        var str = (Array.isArray(data) ? data.join(",") : data.toString()).toUpperCase();
         if (Array.isArray(filtro.value)) {
-            return filtro.value.some(function (value) { return !(data).toUpperCase().includes(value.toUpperCase()); });
+            return filtro.value.some(function (value) { return !str.includes(value.toUpperCase()); });
         }
-        return !data.toString().toUpperCase().includes(value.toUpperCase());
+        return !str.includes(value.toUpperCase());
     },
     _a[OPERATORS.STARTS_WITH] = function (data, value) {
         if (!data)

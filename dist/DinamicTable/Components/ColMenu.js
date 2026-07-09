@@ -105,25 +105,44 @@ export var OPERADORES = {
     ]
 };
 var ColMenu = function (props) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d;
     var filtroI = props.col.props.dinamicTableInstance.filtros.findIndex(function (e) { return e.col == props.col.props.id; });
     var filtro = null;
     if (filtroI >= 0) {
         filtro = props.col.props.dinamicTableInstance.filtros[filtroI];
         // setSearch({ ...filtro })
     }
-    var _f = React.useState([]), list = _f[0], setList = _f[1];
-    var _g = React.useState({
+    var _e = React.useState([]), list = _e[0], setList = _e[1];
+    var _f = React.useState({
         dateSelec: null
-    }), state = _g[0], setState = _g[1];
-    var _h = React.useState(__assign({ col: props.col.props.id, type: props.col.props.dataType, operator: "contains", dateFormat: props.col.props.dateFormat, value: [] }, filtro)), search = _h[0], setSearch = _h[1];
+    }), state = _f[0], setState = _f[1];
+    var _g = React.useState(__assign({ col: props.col.props.id, type: props.col.props.dataType, operator: "contains", dateFormat: props.col.props.dateFormat, value: [] }, filtro)), search = _g[0], setSearch = _g[1];
+    var commitFilter = function (newSearch) {
+        var _a;
+        setSearch(newSearch);
+        var instance = props.col.props.dinamicTableInstance;
+        var OP = OPERADORES[props.col.props.dataType].find(function (e) { return e.value == newSearch.operator; });
+        var filtroI = instance.filtros.findIndex(function (e) { return e.col == props.col.props.id; });
+        if (newSearch.value.length > 0 || ((_a = OP === null || OP === void 0 ? void 0 : OP.params) !== null && _a !== void 0 ? _a : 1) <= 0) {
+            if (filtroI >= 0) {
+                instance.filtros[filtroI] = newSearch;
+            }
+            else {
+                instance.filtros.push(newSearch);
+            }
+        }
+        else if (filtroI >= 0) {
+            instance.filtros.splice(filtroI, 1);
+        }
+        instance.applyFilter();
+    };
     // const searchRef = React.useRef(search);
     // useEffect(() => {
     //     searchRef.current = search;
     // }, [search])
     useEffect(function () {
         var formatData = function () { return __awaiter(void 0, void 0, void 0, function () {
-            var maxIndex, dataFormat, dataFilter, rows, groups;
+            var maxIndex, dataFormat, dataFilter, rows, sortKeys, groups, order;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -136,6 +155,7 @@ var ColMenu = function (props) {
                     case 1:
                         dataFilter = _a.sent();
                         rows = [];
+                        sortKeys = [];
                         groups = dataFilter.reduce(function (acc, row, index) {
                             var value = row[props.col.props.id];
                             if (!value)
@@ -149,21 +169,28 @@ var ColMenu = function (props) {
                                 }
                             }
                             if (Array.isArray(value)) {
+                                // Array-valued columns (eg. tags/tipos) can't be represented by a
+                                // single row: a row with several values would otherwise render ALL
+                                // its values every time any one of them is newly discovered. Push a
+                                // lightweight marker for just this single value instead.
                                 value.map(function (e) {
                                     if (!acc.includes(e)) {
-                                        rows.push(row);
                                         acc.push(e);
+                                        rows.push({ __arrayFilterValue: e });
+                                        sortKeys.push(String(e));
                                     }
                                 });
                             }
                             else if (!acc.includes(value)) {
                                 rows.push(row);
+                                sortKeys.push(String(value));
                                 acc.push(value);
                             }
                             return acc;
                         }, []);
-                        // console.log("rows", groups);
-                        setList(rows);
+                        order = rows.map(function (_, i) { return i; })
+                            .sort(function (a, b) { return sortKeys[a].localeCompare(sortKeys[b], undefined, { numeric: true, sensitivity: "base" }); });
+                        setList(order.map(function (i) { return rows[i]; }));
                         return [2 /*return*/];
                 }
             });
@@ -180,7 +207,17 @@ var ColMenu = function (props) {
         //         props.col.props.dinamicTableInstance.applyFilter()
         //     }
         // }
-    }, []);
+        // Recompute when the popup targets a different column: the popup is reused
+        // across columns (same "colMenu" key in Popup.tsx) instead of being remounted,
+        // so without this dependency the list stays frozen from whichever column
+        // opened the popup first.
+    }, [props.col.props.id]);
+    useEffect(function () {
+        setSearch(__assign({ col: props.col.props.id, type: props.col.props.dataType, operator: "contains", dateFormat: props.col.props.dateFormat, value: [] }, filtro));
+        // Same reuse issue as above: reset the search/filter state when switching
+        // to a different column so stale values/operator from the previous column
+        // don't leak in.
+    }, [props.col.props.id]);
     var hanldeSort = function (order) {
         var sorters = props.col.props.dinamicTableInstance.sorter;
         var sorterI = sorters.findIndex(function (e) { return e.key == props.col.props.id; });
@@ -223,6 +260,29 @@ var ColMenu = function (props) {
                         borderRadius: 4
                     }, contentContainerStyle: { padding: 4, paddingBottom: 40 }, ItemSeparatorComponent: function () { return React.createElement(View, { style: { height: 8 } }); }, renderItem: function (_a) {
                         var item = _a.item, index = _a.index;
+                        if (item && item.__arrayFilterValue !== undefined) {
+                            var value_1 = item.__arrayFilterValue;
+                            var styleText = StyleSheet.flatten([{ color: colors.text }, props.col.props.dinamicTableInstance.props.textStyle, props.col.props.textStyle]);
+                            var isCheck_1 = search.value.includes(value_1);
+                            return React.createElement(TouchableOpacity, { style: {
+                                    flexDirection: "row",
+                                    alignItems: "center"
+                                }, onPress: function () {
+                                    if (!Array.isArray(search.value)) {
+                                        search.value = [];
+                                    }
+                                    if (isCheck_1) {
+                                        commitFilter(__assign(__assign({}, search), { value: search.value.filter(function (e) { return e != value_1; }) }));
+                                    }
+                                    else {
+                                        commitFilter(__assign(__assign({}, search), { value: __spreadArray(__spreadArray([], search.value, true), [value_1], false) }));
+                                    }
+                                } },
+                                React.createElement(CheckBox, { value: isCheck_1, color: colors.accent, colorActive: colors.accent }),
+                                React.createElement(View, { style: { width: 4 } }),
+                                React.createElement(View, { style: { flex: 1 }, pointerEvents: "none" },
+                                    React.createElement(Text, { numberOfLines: 1, style: [styleText] }, value_1)));
+                        }
                         var COMPONENT = null;
                         var colData = props.col.props.dinamicTableInstance.colData[props.col.props.id];
                         var data = item[props.col.props.id];
@@ -259,19 +319,11 @@ var ColMenu = function (props) {
                                     search.value = [];
                                 }
                                 if (isCheck) {
-                                    setSearch(__assign(__assign({}, search), { value: search.value.filter(function (e) { return e != data.toString(); }) }));
+                                    commitFilter(__assign(__assign({}, search), { value: search.value.filter(function (e) { return e != data.toString(); }) }));
                                 }
                                 else {
-                                    setSearch(__assign(__assign({}, search), { value: __spreadArray(__spreadArray([], search.value, true), [data.toString()], false) }));
+                                    commitFilter(__assign(__assign({}, search), { value: __spreadArray(__spreadArray([], search.value, true), [data.toString()], false) }));
                                 }
-                                // props.col.props.dinamicTableInstance.filtros.push({
-                                //     col: props.col.props.id,
-                                //     type: props.col.props.dataType,
-                                //     operator: "=",
-                                //     value: item[props.col.props.id]
-                                // })
-                                // props.col.props.dinamicTableInstance.applyFilter()
-                                // props.col.props.dinamicTableInstance?.popup?.close("colMenu")
                             } },
                             React.createElement(CheckBox, { value: isCheck, color: colors.accent, colorActive: colors.accent }),
                             React.createElement(View, { style: { width: 4 } }),
@@ -426,7 +478,7 @@ var ColMenu = function (props) {
             borderWidth: 1,
             borderColor: colors.border
         } },
-        React.createElement(Text, { style: { color: colors.text, fontWeight: "bold", textAlign: "center", fontSize: 12 } }, (_c = (_b = (_a = props === null || props === void 0 ? void 0 : props.col) === null || _a === void 0 ? void 0 : _a.props) === null || _b === void 0 ? void 0 : _b.label) !== null && _c !== void 0 ? _c : (_e = (_d = props === null || props === void 0 ? void 0 : props.col) === null || _d === void 0 ? void 0 : _d.props) === null || _e === void 0 ? void 0 : _e.id),
+        React.createElement(Text, { style: { color: colors.text, fontWeight: "bold", textAlign: "center", fontSize: 12 } }, typeof ((_b = (_a = props === null || props === void 0 ? void 0 : props.col) === null || _a === void 0 ? void 0 : _a.props) === null || _b === void 0 ? void 0 : _b.label) === "string" ? props.col.props.label : (_d = (_c = props === null || props === void 0 ? void 0 : props.col) === null || _c === void 0 ? void 0 : _c.props) === null || _d === void 0 ? void 0 : _d.id),
         React.createElement(View, { style: { height: 8 } }),
         React.createElement(TouchableOpacity, { onPress: function () {
                 props.col.props.dinamicTableInstance.colData[props.col.props.id].wrap = !props.col.props.dinamicTableInstance.colData[props.col.props.id].wrap;

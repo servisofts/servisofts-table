@@ -37,6 +37,12 @@ export type ExporterStateType = {
     };
     groupers?: GrouperType[];
 };
+export type HeaderGroupType = {
+    label: string;
+    cols: string[];
+    style?: ViewStyle;
+    textStyle?: TextStyle;
+};
 type DinamicTablePropsType<T> = {
     loadData: () => Promise<T[]>;
     loadInitialState?: () => Promise<ExporterStateType>;
@@ -86,6 +92,7 @@ type DinamicTablePropsType<T> = {
         dinamicTable: DinamicTable<T>;
     }) => ReactElement | null;
     onSelectionChange?: (rows: T[]) => void;
+    headerGroups?: HeaderGroupType[];
 };
 type rowEventListenersType = {
     type: "onSelect";
@@ -166,6 +173,7 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
     applyHeaderSize: () => void;
     addRow(data: any): Promise<void>;
     renderCantidadResultados(): JSX.Element;
+    private renderHeaderGroups;
     private renderColumnHeaders;
     private renderColumnFooters;
     private renderListItem;

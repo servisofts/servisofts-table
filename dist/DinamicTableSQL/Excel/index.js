@@ -73,7 +73,10 @@ var Excel = /** @class */ (function () {
                     var colLetter = utils.encode_col(i);
                     var firstDataRow = 3; // Fila donde empiezan los datos en Excel (1-based)
                     var lastDataRow = firstDataRow + dataRows.length - 1;
+                    var sum = dataRows.reduce(function (acc, r) { return acc + (Number(r[i]) || 0); }, 0);
                     return {
+                        v: sum,
+                        t: 'n',
                         f: "SUM(".concat(colLetter).concat(firstDataRow, ":").concat(colLetter).concat(lastDataRow, ")"),
                         s: {
                             font: { bold: true },
