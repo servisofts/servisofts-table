@@ -322,7 +322,7 @@ var ColMenu = function (props) {
                                 commitFilter(__assign(__assign({}, search), { value: __spreadArray(__spreadArray([], currentValue, true), toAdd, true) }));
                             }
                         } },
-                        React.createElement(CheckBox, { value: allChecked, color: colors.accent, colorActive: colors.accent }),
+                        React.createElement(CheckBox, { value: allChecked, color: colors.accent, colorActive: colors.accent, colorIcon: colors.text }),
                         React.createElement(View, { style: { width: 6 } }),
                         React.createElement(Text, { numberOfLines: 1, style: [styleText, { fontWeight: "700", fontSize: 12 }] }, group.dayKey),
                         React.createElement(View, { style: { flex: 1 } }),
@@ -351,7 +351,7 @@ var ColMenu = function (props) {
                                         commitFilter(__assign(__assign({}, search), { value: __spreadArray(__spreadArray([], currentValue, true), [it.iso], false) }));
                                     }
                                 } },
-                                React.createElement(CheckBox, { value: isCheck, color: colors.accent, colorActive: colors.accent }),
+                                React.createElement(CheckBox, { value: isCheck, color: colors.accent, colorActive: colors.accent, colorIcon: colors.text }),
                                 React.createElement(View, { style: { width: 6 } }),
                                 React.createElement(Text, { numberOfLines: 1, style: [styleText, { fontSize: 11 }] }, it.timeLabel));
                         }))));
@@ -403,7 +403,7 @@ var ColMenu = function (props) {
                                         commitFilter(__assign(__assign({}, search), { value: __spreadArray(__spreadArray([], search.value, true), [value_1], false) }));
                                     }
                                 } },
-                                React.createElement(CheckBox, { value: isCheck_1, color: colors.accent, colorActive: colors.accent }),
+                                React.createElement(CheckBox, { value: isCheck_1, color: colors.accent, colorActive: colors.accent, colorIcon: colors.text }),
                                 React.createElement(View, { style: { width: 4 } }),
                                 React.createElement(View, { style: { flex: 1 }, pointerEvents: "none" },
                                     React.createElement(Text, { numberOfLines: 1, style: [styleText] }, value_1)),
@@ -469,7 +469,7 @@ var ColMenu = function (props) {
                                     commitFilter(__assign(__assign({}, search), { value: __spreadArray(__spreadArray([], search.value, true), [data.toString()], false) }));
                                 }
                             } },
-                            React.createElement(CheckBox, { value: isCheck, color: colors.accent, colorActive: colors.accent }),
+                            React.createElement(CheckBox, { value: isCheck, color: colors.accent, colorActive: colors.accent, colorIcon: colors.text }),
                             React.createElement(View, { style: { width: 4 } }),
                             React.createElement(View, { style: { flex: 1, height: "100%", flexDirection: "row", alignItems: "center" }, pointerEvents: "none" }, COMPONENT),
                             React.createElement(Text, { numberOfLines: 1, style: { color: colors.card, fontSize: 9, opacity: 0.7, marginLeft: 6, fontVariant: ["tabular-nums"] } }, count));
@@ -632,7 +632,7 @@ var ColMenu = function (props) {
                 setSearch(__assign({}, search));
                 props.col.props.dinamicTableInstance.forceUpdate();
             }, style: { flexDirection: "row", alignItems: "center" } },
-            React.createElement(CheckBox, { value: props.col.props.dinamicTableInstance.colData[props.col.props.id].wrap, color: colors.accent, colorActive: colors.accent, colorIcon: colors.background }),
+            React.createElement(CheckBox, { value: props.col.props.dinamicTableInstance.colData[props.col.props.id].wrap, color: colors.accent, colorActive: colors.accent, colorIcon: colors.text }),
             React.createElement(View, { style: { width: 8 } }),
             React.createElement(Text, { style: { color: colors.text, fontSize: 11 } }, SLanguage.select({
                 en: "Wrap content",

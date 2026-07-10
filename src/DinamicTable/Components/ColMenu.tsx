@@ -284,7 +284,7 @@ const ColMenu = (props: { col: Col<any> }) => {
                                 commitFilter({ ...search, value: [...currentValue, ...toAdd] })
                             }
                         }}>
-                            <CheckBox value={allChecked} color={colors.accent} colorActive={colors.accent} />
+                            <CheckBox value={allChecked} color={colors.accent} colorActive={colors.accent} colorIcon={colors.text} />
                             <View style={{ width: 6 }} />
                             <Text numberOfLines={1} style={[styleText, { fontWeight: "700", fontSize: 12 }]}>{group.dayKey}</Text>
                             <View style={{ flex: 1 }} />
@@ -317,7 +317,7 @@ const ColMenu = (props: { col: Col<any> }) => {
                                             commitFilter({ ...search, value: [...currentValue, it.iso] })
                                         }
                                     }}>
-                                        <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} />
+                                        <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} colorIcon={colors.text} />
                                         <View style={{ width: 6 }} />
                                         <Text numberOfLines={1} style={[styleText, { fontSize: 11 }]}>{it.timeLabel}</Text>
                                     </TouchableOpacity>
@@ -376,7 +376,7 @@ const ColMenu = (props: { col: Col<any> }) => {
                                     commitFilter({ ...search, value: [...search.value, value] })
                                 }
                             }}>
-                                <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} />
+                                <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} colorIcon={colors.text} />
                                 <View style={{ width: 4 }} />
                                 <View style={{ flex: 1, }} pointerEvents="none">
                                     <Text numberOfLines={1} style={[styleText]}>{value}</Text>
@@ -449,7 +449,7 @@ const ColMenu = (props: { col: Col<any> }) => {
                             }
 
                         }}>
-                            <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} />
+                            <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} colorIcon={colors.text} />
                             <View style={{ width: 4 }} />
                             <View style={{ flex: 1, height: "100%", flexDirection: "row", alignItems: "center" }} pointerEvents="none">
                                 {COMPONENT}
@@ -654,7 +654,7 @@ const ColMenu = (props: { col: Col<any> }) => {
             setSearch({ ...search })
             props.col.props.dinamicTableInstance.forceUpdate();
         }} style={{ flexDirection: "row", alignItems: "center" }}>
-            <CheckBox value={props.col.props.dinamicTableInstance.colData[props.col.props.id].wrap} color={colors.accent} colorActive={colors.accent} colorIcon={colors.background} />
+            <CheckBox value={props.col.props.dinamicTableInstance.colData[props.col.props.id].wrap} color={colors.accent} colorActive={colors.accent} colorIcon={colors.text} />
             <View style={{ width: 8 }} />
             <Text style={{ color: colors.text, fontSize: 11 }}  >{
                 SLanguage.select({
