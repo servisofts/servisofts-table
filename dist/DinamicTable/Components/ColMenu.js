@@ -306,10 +306,12 @@ var ColMenu = function (props) {
                 var checkedCount = group.items.filter(function (it) { return currentValue.includes(it.iso); }).length;
                 var allChecked = group.items.length > 0 && checkedCount === group.items.length;
                 return React.createElement(View, { key: group.dayKey, style: {
-                        marginBottom: 6,
                         borderRadius: 6,
                         backgroundColor: allChecked ? colors.accent + "22" : "transparent",
-                        padding: 4
+                        paddingTop: 2,
+                        paddingBottom: 4
+                        // paddingHorizontal: 4
+                        //  backgroundColor: "cyan"
                     } },
                     React.createElement(TouchableOpacity, { style: { flexDirection: "row", alignItems: "center", paddingVertical: 2 }, onPress: function () {
                             if (allChecked) {
@@ -329,15 +331,17 @@ var ColMenu = function (props) {
                         React.createElement(View, { style: { width: 8 } }),
                         React.createElement(View, { style: { width: 1, backgroundColor: colors.border, marginVertical: 2 } }),
                         React.createElement(View, { style: { width: 8 } }),
-                        React.createElement(View, { style: { flex: 1, paddingTop: 2 } }, group.items.map(function (it) {
+                        React.createElement(View, { style: {
+                                flex: 1, paddingTop: 2
+                            } }, group.items.map(function (it) {
                             var isCheck = currentValue.includes(it.iso);
                             return React.createElement(TouchableOpacity, { key: it.iso, style: {
                                     flexDirection: "row",
                                     alignItems: "center",
                                     paddingVertical: 3,
-                                    paddingHorizontal: 4,
+                                    paddingHorizontal: 2,
                                     borderRadius: 4,
-                                    marginTop: 2,
+                                    //  backgroundColor: "red"
                                     backgroundColor: isCheck ? colors.accent + "18" : "transparent"
                                 }, onPress: function () {
                                     if (isCheck) {

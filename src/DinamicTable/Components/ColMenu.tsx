@@ -269,10 +269,12 @@ const ColMenu = (props: { col: Col<any> }) => {
                     const checkedCount = group.items.filter(it => currentValue.includes(it.iso)).length;
                     const allChecked = group.items.length > 0 && checkedCount === group.items.length;
                     return <View key={group.dayKey} style={{
-                        marginBottom: 6,
                         borderRadius: 6,
                         backgroundColor: allChecked ? colors.accent + "22" : "transparent",
-                        padding: 4,
+                        paddingTop: 2,
+                        paddingBottom: 4
+                        // paddingHorizontal: 4
+                        //  backgroundColor: "cyan"
                     }}>
                         <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", paddingVertical: 2 }} onPress={() => {
                             if (allChecked) {
@@ -294,16 +296,19 @@ const ColMenu = (props: { col: Col<any> }) => {
                             <View style={{ width: 8 }} />
                             <View style={{ width: 1, backgroundColor: colors.border, marginVertical: 2 }} />
                             <View style={{ width: 8 }} />
-                            <View style={{ flex: 1, paddingTop: 2 }}>
+                            <View style={{
+                                flex: 1, paddingTop: 2,
+                                // backgroundColor: "green"
+                            }}>
                                 {group.items.map((it) => {
                                     const isCheck = currentValue.includes(it.iso);
                                     return <TouchableOpacity key={it.iso} style={{
                                         flexDirection: "row",
                                         alignItems: "center",
                                         paddingVertical: 3,
-                                        paddingHorizontal: 4,
+                                        paddingHorizontal: 2,
                                         borderRadius: 4,
-                                        marginTop: 2,
+                                        //  backgroundColor: "red"
                                         backgroundColor: isCheck ? colors.accent + "18" : "transparent",
                                     }} onPress={() => {
                                         if (isCheck) {
@@ -342,11 +347,11 @@ const ColMenu = (props: { col: Col<any> }) => {
             <View style={{ height: 1, backgroundColor: colors.border }} />
             <View style={{ height: 4, }} />
             <ScrollView horizontal contentContainerStyle={{
-                minWidth:"100%"
+                minWidth: "100%"
             }}>
                 <FlatList data={list}
                     style={{
-                        width:"100%",
+                        width: "100%",
                         // backgroundColor:"#F0f",
                         // borderColor: colors.border,
                         borderRadius: 4,

@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import Col from "../Col";
 export declare const OPERADORES: {
     string: {
