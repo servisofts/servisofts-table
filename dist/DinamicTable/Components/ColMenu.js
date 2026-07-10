@@ -382,7 +382,7 @@ var ColMenu = function (props) {
                         // backgroundColor:"#F0f",
                         // borderColor: colors.border,
                         borderRadius: 4
-                    }, contentContainerStyle: { padding: 4, paddingBottom: 40 }, ItemSeparatorComponent: function () { return React.createElement(View, { style: { height: 8 } }); }, renderItem: function (_a) {
+                    }, contentContainerStyle: { padding: 4, paddingBottom: 40 }, ItemSeparatorComponent: function () { return React.createElement(View, { style: { height: 1 } }); }, renderItem: function (_a) {
                         var _b, _c, _d;
                         var item = _a.item, index = _a.index;
                         if (item && item.__arrayFilterValue !== undefined) {

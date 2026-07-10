@@ -357,7 +357,7 @@ const ColMenu = (props: { col: Col<any> }) => {
                         borderRadius: 4,
                     }}
                     contentContainerStyle={{ padding: 4, paddingBottom: 40 }}
-                    ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+                    ItemSeparatorComponent={() => <View style={{ height: 1 }} />}
                     renderItem={({ item, index }) => {
                         if (item && item.__arrayFilterValue !== undefined) {
                             const value = item.__arrayFilterValue;
