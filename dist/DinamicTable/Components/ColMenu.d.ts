@@ -33,6 +33,22 @@ export declare const OPERADORES: {
         };
         params: number;
     }[];
+    time: {
+        value: string;
+        label: {
+            en: string;
+            es: string;
+        };
+        params: number;
+    }[];
+    datetime: {
+        value: string;
+        label: {
+            en: string;
+            es: string;
+        };
+        params: number;
+    }[];
 };
 declare const ColMenu: (props: {
     col: Col<any>;

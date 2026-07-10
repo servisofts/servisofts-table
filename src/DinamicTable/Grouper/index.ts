@@ -21,10 +21,15 @@ export default class Grouper {
 
             if (value === null || value === undefined || value === "") {
                 displayValue = "(empty)";
-            } else if (grouper.type === "date" && value instanceof Date) {
+            } else if ((grouper.type === "date" || grouper.type === "datetime") && value instanceof Date) {
                 displayValue = grouper.dateFormat
                     ? String(new SDate(value).toString(grouper.dateFormat as any))
                     : value.toISOString();
+            } else if (grouper.type === "time" && value instanceof Date) {
+                // Group by hour/minute of day only, ignoring the date part.
+                displayValue = grouper.dateFormat
+                    ? String(new SDate(value).toString(grouper.dateFormat as any))
+                    : `${String(value.getHours()).padStart(2, "0")}:${String(value.getMinutes()).padStart(2, "0")}`;
             } else {
                 displayValue = value.toString();
             }

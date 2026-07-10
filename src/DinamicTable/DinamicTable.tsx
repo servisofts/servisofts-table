@@ -420,6 +420,8 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
                         data = Array.isArray(data) ? data : data + ""
                         break;
                     case "date":
+                    case "time":
+                    case "datetime":
                         if (!!data) {
                             if (data instanceof Date) {
                                 data = data

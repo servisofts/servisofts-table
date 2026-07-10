@@ -27,6 +27,7 @@ var Sorter = /** @class */ (function () {
                         compareResult = Number(valueA) - Number(valueB);
                         break;
                     case 'date':
+                    case 'datetime':
                         if (sorter.dateFormat) {
                             console.log("Asdasdas");
                             var a1 = new SDate(valueA);
@@ -36,6 +37,10 @@ var Sorter = /** @class */ (function () {
                             valueB = new SDate((new SDate(valueB).toString(sorter.dateFormat)), sorter.dateFormat);
                         }
                         compareResult = valueA.getTime() - valueB.getTime();
+                        break;
+                    case 'time':
+                        // Only the hour/minute of day matter, the date part is irrelevant.
+                        compareResult = (valueA.getHours() * 60 + valueA.getMinutes()) - (valueB.getHours() * 60 + valueB.getMinutes());
                         break;
                     default:
                         break;

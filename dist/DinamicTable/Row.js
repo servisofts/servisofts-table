@@ -121,7 +121,7 @@ var Row = /** @class */ (function (_super) {
                     else {
                         dataFormat = !data ? "" : data.toString();
                         if (dataFormat) {
-                            if (colProps.dataType === "date") {
+                            if (colProps.dataType === "date" || colProps.dataType === "time" || colProps.dataType === "datetime") {
                                 if (colProps.dateFormat) {
                                     dataFormat = new SDate(data).toString(colProps.dateFormat);
                                 }

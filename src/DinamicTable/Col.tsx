@@ -16,7 +16,11 @@ export type ColPropsType<T> = {
     width: number,
     data: (props: { row: T, index: number }) => any,
     format?: (props: { data: any, row: T, index: number, textStyle: TextStyle }) => any,
-    customComponent?: (props: { data: any, dataFormat: any, row: T, index: number, textStyle: TextStyle, dinamicTable: DinamicTable<T>, colData: ColData }) => any,
+    // filterList is true when this renders a value inside the column's filter
+    // popup checklist instead of an actual table cell: that list is narrower and
+    // each row is height-clamped, so a customComponent (eg. an avatar + name) may
+    // want to render a more compact version there (smaller avatar, tighter gaps).
+    customComponent?: (props: { data: any, dataFormat: any, row: T, index: number, textStyle: TextStyle, dinamicTable: DinamicTable<T>, colData: ColData, filterList?: boolean }) => any,
     onPress?: (props: { data: any, dataFormat: any, row: T, index: number, textStyle: TextStyle, dinamicTable: DinamicTable<T>, colData: ColData }) => any,
     dinamicTableInstance?: DinamicTable<T>,
     children?: any,
@@ -95,8 +99,13 @@ export default class Col<T> extends React.Component<ColPropsType<T>> {
         dinamicTableInstance.popup.show({
             key: "colMenu",
             onPressEvent: evt,
-            height: 308,
-            width: 190,
+            // "datetime"/"time" list a grouped tree (day or hour), which needs more room than a flat list.
+            height: (this.props.dataType === "datetime" || this.props.dataType === "time") ? 460 : 308,
+            // "date"/"time"/"datetime" values are short and fixed-format ("2026-07-08",
+            // "08:30:00"), so the popup can stay narrow. Anything else (string, number,
+            // boolean - names, labels, custom avatars, etc.) tends to run longer, so it
+            // gets extra room. 210 is still enough to fit "Ascendente"/"Descendente" side by side.
+            width: this.props.dataType === "date" ? 180 : (this.props.dataType === "time" || this.props.dataType === "datetime") ? 200 : 290,
             parent: dinamicTableInstance.containerRef, render: () => { return <ColMenu col={this} /> }
         })
     }

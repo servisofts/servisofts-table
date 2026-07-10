@@ -51,6 +51,28 @@ export const OPERADORES = {
         { value: OPERATORS.IS_NULL, label: { en: "Is null", es: "Es nulo" }, params: 0 },
         { value: OPERATORS.IS_NOT_NULL, label: { en: "Is not null", es: "No es nulo" }, params: 0 },
     ],
+    time: [
+        { value: OPERATORS.BETWEEN, label: { en: "Between", es: "Entre" }, params: 2 },
+        { value: OPERATORS.EQUAL, label: { en: "Equal to", es: "Igual a" }, params: 1 },
+        { value: OPERATORS.NOT_EQUAL, label: { en: "Not equal to", es: "No igual a" }, params: 1 },
+        { value: OPERATORS.LESS_THAN, label: { en: "Less than", es: "Menor que" }, params: 1 },
+        { value: OPERATORS.GREATER_THAN, label: { en: "Greater than", es: "Mayor que" }, params: 1 },
+        { value: OPERATORS.LESS_THAN_OR_EQUAL, label: { en: "Less than or equal to", es: "Menor o igual que" }, params: 1 },
+        { value: OPERATORS.GREATER_THAN_OR_EQUAL, label: { en: "Greater than or equal to", es: "Mayor o igual que" }, params: 1 },
+        { value: OPERATORS.IS_NULL, label: { en: "Is null", es: "Es nulo" }, params: 0 },
+        { value: OPERATORS.IS_NOT_NULL, label: { en: "Is not null", es: "No es nulo" }, params: 0 },
+    ],
+    datetime: [
+        { value: OPERATORS.BETWEEN, label: { en: "Between", es: "Entre" }, params: 2 },
+        { value: OPERATORS.EQUAL, label: { en: "Equal to", es: "Igual a" }, params: 1 },
+        { value: OPERATORS.NOT_EQUAL, label: { en: "Not equal to", es: "No igual a" }, params: 1 },
+        { value: OPERATORS.LESS_THAN, label: { en: "Less than", es: "Menor que" }, params: 1 },
+        { value: OPERATORS.GREATER_THAN, label: { en: "Greater than", es: "Mayor que" }, params: 1 },
+        { value: OPERATORS.LESS_THAN_OR_EQUAL, label: { en: "Less than or equal to", es: "Menor o igual que" }, params: 1 },
+        { value: OPERATORS.GREATER_THAN_OR_EQUAL, label: { en: "Greater than or equal to", es: "Mayor o igual que" }, params: 1 },
+        { value: OPERATORS.IS_NULL, label: { en: "Is null", es: "Es nulo" }, params: 0 },
+        { value: OPERATORS.IS_NOT_NULL, label: { en: "Is not null", es: "No es nulo" }, params: 0 },
+    ],
 }
 
 
@@ -64,6 +86,7 @@ const ColMenu = (props: { col: Col<any> }) => {
     }
 
     const [list, setList] = React.useState([] as any[])
+    const [counts, setCounts] = React.useState<{ [key: string]: number }>({})
     const [state, setState] = React.useState({
         dateSelec: null
     })
@@ -91,6 +114,16 @@ const ColMenu = (props: { col: Col<any> }) => {
         }
         instance.applyFilter()
     }
+
+    // What the filter picker groups by: day/time/full-timestamp for date-ish
+    // columns (ignoring the column's own display dateFormat), the raw value otherwise.
+    const groupValue = (raw: any) => {
+        if (!raw) return raw;
+        if (props.col.props.dataType == "date") return String(new SDate(raw).toString("yyyy-MM-dd"));
+        if (props.col.props.dataType == "time") return String(new SDate(raw).toString("hh:mm:ss"));
+        if (props.col.props.dataType == "datetime") return String(new SDate(raw).toString(props.col.props.dateFormat ?? "yyyy-MM-dd hh:mm:ss"));
+        return raw;
+    }
     // const searchRef = React.useRef(search);
 
     // useEffect(() => {
@@ -109,32 +142,31 @@ const ColMenu = (props: { col: Col<any> }) => {
             let dataFilter: any = await Filter.filterData(dataFormat, props.col.props.dinamicTableInstance.filtros.slice(0, maxIndex))
             const rows = [];
             const sortKeys: string[] = [];
+            const rowCounts: { [key: string]: number } = {};
             const groups = dataFilter.reduce((acc, row, index) => {
-                let value = row[props.col.props.id];
-                if (!value) return acc;
-                if (props.col.props.dataType == "date") {
-                    if (props.col.props.dateFormat) {
-                        value = new SDate(value).toString(props.col.props.dateFormat)
-                    } else {
-                        value = value.toString();
-                    }
-                }
+                const rawValue = row[props.col.props.id];
+                if (!rawValue) return acc;
+                const value = groupValue(rawValue);
                 if (Array.isArray(value)) {
                     // Array-valued columns (eg. tags/tipos) can't be represented by a
                     // single row: a row with several values would otherwise render ALL
                     // its values every time any one of them is newly discovered. Push a
                     // lightweight marker for just this single value instead.
                     value.map(e => {
+                        rowCounts[e] = (rowCounts[e] ?? 0) + 1;
                         if (!acc.includes(e)) {
                             acc.push(e)
                             rows.push({ __arrayFilterValue: e })
                             sortKeys.push(String(e))
                         }
                     })
-                } else if (!acc.includes(value)) {
-                    rows.push(row)
-                    sortKeys.push(String(value))
-                    acc.push(value)
+                } else {
+                    rowCounts[value] = (rowCounts[value] ?? 0) + 1;
+                    if (!acc.includes(value)) {
+                        rows.push(row)
+                        sortKeys.push(String(value))
+                        acc.push(value)
+                    }
                 }
                 return acc;
             }, [] as any[])
@@ -142,6 +174,7 @@ const ColMenu = (props: { col: Col<any> }) => {
             const order = rows.map((_, i) => i)
                 .sort((a, b) => sortKeys[a].localeCompare(sortKeys[b], undefined, { numeric: true, sensitivity: "base" }))
             setList(order.map(i => rows[i]))
+            setCounts(rowCounts)
         }
 
         formatData()
@@ -207,9 +240,103 @@ const ColMenu = (props: { col: Col<any> }) => {
         search.operator = "=";
     }
 
+    // "datetime" values are grouped by day: check the day to filter everything
+    // on that date, or check a single time underneath to filter that exact instant.
+    // Shared by "datetime" (grouped by day) and "time" (grouped by hour): check the
+    // group to filter everything under it, or check one exact time underneath for
+    // just that instant.
+    const RenderGroupedFilterList = (groupFormat: string) => {
+        const styleText = StyleSheet.flatten([{ color: colors.text }, props.col.props.dinamicTableInstance.props.textStyle, props.col.props.textStyle]);
+        const groups: { dayKey: string, items: { iso: string, timeLabel: string }[] }[] = [];
+        list.forEach((row) => {
+            const d: Date = row[props.col.props.id];
+            const dayKey = String(new SDate(d).toString(groupFormat));
+            const iso = d.toISOString();
+            let group = groups.find(g => g.dayKey === dayKey);
+            if (!group) {
+                group = { dayKey, items: [] };
+                groups.push(group);
+            }
+            if (!group.items.some(it => it.iso === iso)) {
+                group.items.push({ iso, timeLabel: String(new SDate(d).toString("hh:mm:ss")) });
+            }
+        });
+
+        return <View style={{ flex: 1, minHeight: 0 }}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 4, paddingBottom: 12 }}>
+                {groups.map((group) => {
+                    const currentValue: string[] = Array.isArray(search.value) ? search.value : [];
+                    const checkedCount = group.items.filter(it => currentValue.includes(it.iso)).length;
+                    const allChecked = group.items.length > 0 && checkedCount === group.items.length;
+                    return <View key={group.dayKey} style={{
+                        marginBottom: 6,
+                        borderRadius: 6,
+                        backgroundColor: allChecked ? colors.accent + "22" : "transparent",
+                        padding: 4,
+                    }}>
+                        <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", paddingVertical: 2 }} onPress={() => {
+                            if (allChecked) {
+                                commitFilter({ ...search, value: currentValue.filter(v => !group.items.some(it => it.iso === v)) })
+                            } else {
+                                const toAdd = group.items.map(it => it.iso).filter(iso => !currentValue.includes(iso));
+                                commitFilter({ ...search, value: [...currentValue, ...toAdd] })
+                            }
+                        }}>
+                            <CheckBox value={allChecked} color={colors.accent} colorActive={colors.accent} />
+                            <View style={{ width: 6 }} />
+                            <Text numberOfLines={1} style={[styleText, { fontWeight: "700", fontSize: 12 }]}>{group.dayKey}</Text>
+                            <View style={{ flex: 1 }} />
+                            <Text numberOfLines={1} style={{ color: colors.card, fontSize: 9, opacity: 0.7, marginLeft: 6, fontVariant: ["tabular-nums"] }}>
+                                {checkedCount > 0 ? `${checkedCount}/${group.items.length}` : `${group.items.length}`}
+                            </Text>
+                        </TouchableOpacity>
+                        <View style={{ flexDirection: "row" }}>
+                            <View style={{ width: 8 }} />
+                            <View style={{ width: 1, backgroundColor: colors.border, marginVertical: 2 }} />
+                            <View style={{ width: 8 }} />
+                            <View style={{ flex: 1, paddingTop: 2 }}>
+                                {group.items.map((it) => {
+                                    const isCheck = currentValue.includes(it.iso);
+                                    return <TouchableOpacity key={it.iso} style={{
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                        paddingVertical: 3,
+                                        paddingHorizontal: 4,
+                                        borderRadius: 4,
+                                        marginTop: 2,
+                                        backgroundColor: isCheck ? colors.accent + "18" : "transparent",
+                                    }} onPress={() => {
+                                        if (isCheck) {
+                                            commitFilter({ ...search, value: currentValue.filter(v => v != it.iso) })
+                                        } else {
+                                            commitFilter({ ...search, value: [...currentValue, it.iso] })
+                                        }
+                                    }}>
+                                        <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} />
+                                        <View style={{ width: 6 }} />
+                                        <Text numberOfLines={1} style={[styleText, { fontSize: 11 }]}>{it.timeLabel}</Text>
+                                    </TouchableOpacity>
+                                })}
+                            </View>
+                        </View>
+                    </View>
+                })}
+            </ScrollView>
+        </View>
+    }
+
     const RenderFilterList = () => {
         if (!!props.col.props.disableFilter) return null;
         if (!!props.col.props.disableFilterGroup) return null;
+        if (props.col.props.dataType == "datetime" || props.col.props.dataType == "time") {
+            return <>
+                <View style={{ height: 5, }} />
+                <View style={{ height: 1, backgroundColor: colors.border }} />
+                <View style={{ height: 4, }} />
+                {RenderGroupedFilterList(props.col.props.dataType == "time" ? "hh:00" : "yyyy-MM-dd")}
+                <View style={{ height: 1, backgroundColor: colors.border }} />
+            </>
+        }
         return <>
             <View style={{ height: 5, }} />
             <View style={{ height: 1, backgroundColor: colors.border }} />
@@ -249,12 +376,14 @@ const ColMenu = (props: { col: Col<any> }) => {
                                 <View style={{ flex: 1, }} pointerEvents="none">
                                     <Text numberOfLines={1} style={[styleText]}>{value}</Text>
                                 </View>
+                                <Text numberOfLines={1} style={{ color: colors.card, fontSize: 9, opacity: 0.7, marginLeft: 6, fontVariant: ["tabular-nums"] }}>{counts[value] ?? 0}</Text>
                             </TouchableOpacity>
                         }
                         let COMPONENT = null;
 
                         const colData = props.col.props.dinamicTableInstance.colData[props.col.props.id];
                         let data = item[props.col.props.id];
+                        const count = counts[groupValue(data)] ?? 0;
                         if (props.col.props.customComponent)
                             COMPONENT = props.col.props.customComponent({
                                 data: item[props.col.props.id],
@@ -263,19 +392,30 @@ const ColMenu = (props: { col: Col<any> }) => {
                                 index,
                                 dinamicTable: props.col.props.dinamicTableInstance,
                                 textStyle: { color: colors.text },
-                                colData: colData
+                                colData: colData,
+                                filterList: true,
                             })
                         else {
                             if (props.col.props.format) {
                                 data = props.col.props.format({ data: item[props.col.props.id], row: item.__original, index, textStyle: { color: colors.text } })
                             }
-                            else if (props.col.props.dataType == "date" && props.col.props.dateFormat) {
-                                data = new SDate(data).toString(props.col.props.dateFormat)
+                            else if (props.col.props.dataType == "date") {
+                                data = new SDate(data).toString("yyyy-MM-dd")
+                            }
+                            else if (props.col.props.dataType == "time") {
+                                data = new SDate(data).toString("hh:mm:ss")
+                            }
+                            else if (props.col.props.dataType == "datetime") {
+                                data = new SDate(data).toString(props.col.props.dateFormat ?? "yyyy-MM-dd hh:mm:ss")
                             }
                             const styleText = StyleSheet.flatten([{ color: colors.text }, props.col.props.dinamicTableInstance.props.textStyle, props.col.props.textStyle])
-                            COMPONENT = <Text numberOfLines={1} style={[styleText]}>{!data ? null : data.toString()}</Text>
+                            // Default filter text to Title Case regardless of how the
+                            // underlying value is cased ("ERICKA SEVILLANO" -> "Ericka Sevillano"),
+                            // it reads better than all-caps or all-lowercase. Only applies
+                            // to plain text (no format/customComponent already styling it).
+                            COMPONENT = <Text numberOfLines={1} style={[styleText, { textTransform: "capitalize" }]}>{!data ? null : data.toString()}</Text>
                         }
-                        if (props.col.props.dataType == "date") {
+                        if (props.col.props.dataType == "date" || props.col.props.dataType == "time" || props.col.props.dataType == "datetime") {
                             const da = item[props.col.props.id];
                             data = da.toISOString();
                         }
@@ -285,6 +425,12 @@ const ColMenu = (props: { col: Col<any> }) => {
                         return <TouchableOpacity style={{
                             flexDirection: "row",
                             alignItems: "center",
+                            // Keep every row the same height no matter what the column's
+                            // customComponent renders (a photo, an initials circle, plain
+                            // text, ...): oversized content gets clipped instead of
+                            // stretching this row taller than its neighbours.
+                            height: 28,
+                            overflow: "hidden",
                         }} onPress={() => {
                             if (!Array.isArray(search.value)) {
                                 search.value = []
@@ -300,9 +446,10 @@ const ColMenu = (props: { col: Col<any> }) => {
                         }}>
                             <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} />
                             <View style={{ width: 4 }} />
-                            <View style={{ flex: 1,  }} pointerEvents="none">
+                            <View style={{ flex: 1, height: "100%", flexDirection: "row", alignItems: "center" }} pointerEvents="none">
                                 {COMPONENT}
                             </View>
+                            <Text numberOfLines={1} style={{ color: colors.card, fontSize: 9, opacity: 0.7, marginLeft: 6, fontVariant: ["tabular-nums"] }}>{count}</Text>
                         </TouchableOpacity>
                     }} />
             </ScrollView>
@@ -316,9 +463,9 @@ const ColMenu = (props: { col: Col<any> }) => {
         // let valtxt = !Array.isArray(search.value) ? search.value : search.value[index]
         let valtxt = search.value[index]
         if (!!valtxt) {
-            if (props.col.props.dateFormat) {
-                valtxt = new SDate(valtxt).toString(props.col.props.dateFormat)
-            }
+            // The calendar only ever picks a day, so always show just the day here
+            // regardless of the column's (possibly full datetime) dateFormat.
+            valtxt = new SDate(valtxt).toString("yyyy-MM-dd")
         }
 
         return <TouchableOpacity
@@ -378,7 +525,11 @@ const ColMenu = (props: { col: Col<any> }) => {
     const RenderFilterTypeText = (index) => {
         return <View>
             <TextInput
-                placeholder={SLanguage.select({ en: "Search...", es: "Buscar..." })}
+                placeholder={
+                    props.col.props.dataType == "time" ? "HH:mm" :
+                        props.col.props.dataType == "datetime" ? "yyyy-MM-dd HH:mm:ss" :
+                            SLanguage.select({ en: "Search...", es: "Buscar..." })
+                }
                 // value={search.value}
 
                 value={!Array.isArray(search.value) ? search.value : ""}
@@ -466,11 +617,11 @@ const ColMenu = (props: { col: Col<any> }) => {
                     <View style={{ width: 2 }} />
                     <Text numberOfLines={1} style={{ color: colors.text, fontSize: 12 }}  >{
                         SLanguage.select({
-                            en: "Asending",
+                            en: "Ascending",
                             es: "Ascendente",
                         })}</Text>
                 </TouchableOpacity>
-                <View style={{ height: 4 }} />
+                <View style={{ width: 8 }} />
                 <TouchableOpacity onPress={() => {
                     hanldeSort("desc")
                 }} style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>

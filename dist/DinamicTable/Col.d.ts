@@ -26,6 +26,7 @@ export type ColPropsType<T> = {
         textStyle: TextStyle;
         dinamicTable: DinamicTable<T>;
         colData: ColData;
+        filterList?: boolean;
     }) => any;
     onPress?: (props: {
         data: any;

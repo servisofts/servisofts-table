@@ -80,8 +80,13 @@ var Col = /** @class */ (function (_super) {
         dinamicTableInstance.popup.show({
             key: "colMenu",
             onPressEvent: evt,
-            height: 308,
-            width: 190,
+            // "datetime"/"time" list a grouped tree (day or hour), which needs more room than a flat list.
+            height: (this.props.dataType === "datetime" || this.props.dataType === "time") ? 460 : 308,
+            // "date"/"time"/"datetime" values are short and fixed-format ("2026-07-08",
+            // "08:30:00"), so the popup can stay narrow. Anything else (string, number,
+            // boolean - names, labels, custom avatars, etc.) tends to run longer, so it
+            // gets extra room. 210 is still enough to fit "Ascendente"/"Descendente" side by side.
+            width: this.props.dataType === "date" ? 180 : (this.props.dataType === "time" || this.props.dataType === "datetime") ? 200 : 290,
             parent: dinamicTableInstance.containerRef, render: function () { return React.createElement(ColMenu, { col: _this }); }
         });
     };

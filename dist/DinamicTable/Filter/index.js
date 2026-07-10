@@ -35,7 +35,31 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _a;
-import SDate from "../../Components/SDate";
+// "time" filters compare only the hour/minute of day, ignoring the date part
+// and whatever dateFormat the column displays (eg. "yyyy-MM-dd hh:mm:ss").
+// Accepts a Date, a plain "HH:mm"/"HH:mm:ss" string (typed in the filter input),
+// or a full date/ISO string (picked from the filter's value checklist).
+var minutesOfDay = function (value) {
+    if (value instanceof Date)
+        return value.getHours() * 60 + value.getMinutes();
+    var plainTime = String(value).match(/^(\d{1,2}):(\d{2})/);
+    if (plainTime)
+        return Number(plainTime[1]) * 60 + Number(plainTime[2]);
+    var asDate = new Date(value);
+    if (!isNaN(asDate.getTime()))
+        return asDate.getHours() * 60 + asDate.getMinutes();
+    return 0;
+};
+// "date" filters compare only the calendar day, ignoring whatever time of day
+// the underlying value carries (a column can hold a full timestamp and still
+// display it via dateFormat="yyyy-MM-dd hh:mm:ss" while filtering by day only).
+var startOfDay = function (value) {
+    var d = value instanceof Date ? value : new Date(value);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+};
+// "datetime" filters compare the exact timestamp (day + time together),
+// unlike "date" (day only) and "time" (time of day only).
+var toTimestamp = function (value) { return (value instanceof Date ? value : new Date(value)).getTime(); };
 export var OPERATORS = {
     EQUAL: "=",
     NOT_EQUAL: "!=",
@@ -58,16 +82,25 @@ var OPERATORS_FUNCTIONS = (_a = {},
         if (!data)
             return false;
         if (filtro.type == "date") {
+            var dataDay_1 = startOfDay(data);
             if (Array.isArray(value)) {
-                return value.some(function (v) {
-                    var dateValue = new Date(v);
-                    return data.getTime() == dateValue.getTime();
-                });
+                return value.some(function (v) { return dataDay_1 == startOfDay(v); });
             }
-            else {
-                var dateValue = new Date(value);
-                return data.getTime() == dateValue.getTime();
+            return dataDay_1 == startOfDay(value);
+        }
+        if (filtro.type == "time") {
+            var dataMinutes_1 = minutesOfDay(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataMinutes_1 == minutesOfDay(v); });
             }
+            return dataMinutes_1 == minutesOfDay(value);
+        }
+        if (filtro.type == "datetime") {
+            var dataTime_1 = toTimestamp(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataTime_1 == toTimestamp(v); });
+            }
+            return dataTime_1 == toTimestamp(value);
         }
         if (Array.isArray(filtro.value)) {
             return filtro.value.some(function (value) { return data == value; });
@@ -77,6 +110,27 @@ var OPERATORS_FUNCTIONS = (_a = {},
     _a[OPERATORS.NOT_EQUAL] = function (data, value, filtro) {
         if (!data)
             return false;
+        if (filtro.type == "date") {
+            var dataDay_2 = startOfDay(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataDay_2 != startOfDay(v); });
+            }
+            return dataDay_2 != startOfDay(value);
+        }
+        if (filtro.type == "time") {
+            var dataMinutes_2 = minutesOfDay(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataMinutes_2 != minutesOfDay(v); });
+            }
+            return dataMinutes_2 != minutesOfDay(value);
+        }
+        if (filtro.type == "datetime") {
+            var dataTime_2 = toTimestamp(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataTime_2 != toTimestamp(v); });
+            }
+            return dataTime_2 != toTimestamp(value);
+        }
         if (Array.isArray(filtro.value)) {
             return filtro.value.some(function (value) { return data != value; });
         }
@@ -86,16 +140,25 @@ var OPERATORS_FUNCTIONS = (_a = {},
         if (!data)
             return false;
         if (filtro.type == "date") {
+            var dataDay_3 = startOfDay(data);
             if (Array.isArray(value)) {
-                return value.some(function (v) {
-                    var dateValue = new SDate(v, "yyyy-MM-dd");
-                    return data.getTime() > dateValue.getTime();
-                });
+                return value.some(function (v) { return dataDay_3 > startOfDay(v); });
             }
-            else {
-                var dateValue = new SDate(value, "yyyy-MM-dd");
-                return data.getTime() > dateValue.getTime();
+            return dataDay_3 > startOfDay(value);
+        }
+        if (filtro.type == "time") {
+            var dataMinutes_3 = minutesOfDay(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataMinutes_3 > minutesOfDay(v); });
             }
+            return dataMinutes_3 > minutesOfDay(value);
+        }
+        if (filtro.type == "datetime") {
+            var dataTime_3 = toTimestamp(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataTime_3 > toTimestamp(v); });
+            }
+            return dataTime_3 > toTimestamp(value);
         }
         return data > value;
     },
@@ -103,16 +166,25 @@ var OPERATORS_FUNCTIONS = (_a = {},
         if (!data)
             return false;
         if (filtro.type == "date") {
+            var dataDay_4 = startOfDay(data);
             if (Array.isArray(value)) {
-                return value.some(function (v) {
-                    var dateValue = new SDate(v, "yyyy-MM-dd");
-                    return data.getTime() < dateValue.getTime();
-                });
+                return value.some(function (v) { return dataDay_4 < startOfDay(v); });
             }
-            else {
-                var dateValue = new SDate(value, "yyyy-MM-dd");
-                return data.getTime() < dateValue.getTime();
+            return dataDay_4 < startOfDay(value);
+        }
+        if (filtro.type == "time") {
+            var dataMinutes_4 = minutesOfDay(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataMinutes_4 < minutesOfDay(v); });
             }
+            return dataMinutes_4 < minutesOfDay(value);
+        }
+        if (filtro.type == "datetime") {
+            var dataTime_4 = toTimestamp(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataTime_4 < toTimestamp(v); });
+            }
+            return dataTime_4 < toTimestamp(value);
         }
         return data < value;
     },
@@ -120,16 +192,25 @@ var OPERATORS_FUNCTIONS = (_a = {},
         if (!data)
             return false;
         if (filtro.type == "date") {
+            var dataDay_5 = startOfDay(data);
             if (Array.isArray(value)) {
-                return value.some(function (v) {
-                    var dateValue = new SDate(v, "yyyy-MM-dd");
-                    return data.getTime() >= dateValue.getTime();
-                });
+                return value.some(function (v) { return dataDay_5 >= startOfDay(v); });
             }
-            else {
-                var dateValue = new SDate(value, "yyyy-MM-dd");
-                return data.getTime() >= dateValue.getTime();
+            return dataDay_5 >= startOfDay(value);
+        }
+        if (filtro.type == "time") {
+            var dataMinutes_5 = minutesOfDay(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataMinutes_5 >= minutesOfDay(v); });
             }
+            return dataMinutes_5 >= minutesOfDay(value);
+        }
+        if (filtro.type == "datetime") {
+            var dataTime_5 = toTimestamp(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataTime_5 >= toTimestamp(v); });
+            }
+            return dataTime_5 >= toTimestamp(value);
         }
         return data >= value;
     },
@@ -137,16 +218,25 @@ var OPERATORS_FUNCTIONS = (_a = {},
         if (!data)
             return false;
         if (filtro.type == "date") {
+            var dataDay_6 = startOfDay(data);
             if (Array.isArray(value)) {
-                return value.some(function (v) {
-                    var dateValue = new SDate(v, "yyyy-MM-dd");
-                    return data.getTime() <= dateValue.getTime();
-                });
+                return value.some(function (v) { return dataDay_6 <= startOfDay(v); });
             }
-            else {
-                var dateValue = new SDate(value, "yyyy-MM-dd");
-                return data.getTime() <= dateValue.getTime();
+            return dataDay_6 <= startOfDay(value);
+        }
+        if (filtro.type == "time") {
+            var dataMinutes_6 = minutesOfDay(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataMinutes_6 <= minutesOfDay(v); });
             }
+            return dataMinutes_6 <= minutesOfDay(value);
+        }
+        if (filtro.type == "datetime") {
+            var dataTime_6 = toTimestamp(data);
+            if (Array.isArray(value)) {
+                return value.some(function (v) { return dataTime_6 <= toTimestamp(v); });
+            }
+            return dataTime_6 <= toTimestamp(value);
         }
         return data <= value;
     },
@@ -197,9 +287,16 @@ var OPERATORS_FUNCTIONS = (_a = {},
             return false;
         var start = value[0], end = value[1];
         if (filtro.type === "date") {
-            var startDate = new SDate(start, "yyyy-MM-dd");
-            var endDate = new SDate(end, "yyyy-MM-dd");
-            return data.getTime() >= startDate.getTime() && data.getTime() <= endDate.getTime();
+            var dataDay = startOfDay(data);
+            return dataDay >= startOfDay(start) && dataDay <= startOfDay(end);
+        }
+        if (filtro.type === "time") {
+            var dataMinutes = minutesOfDay(data);
+            return dataMinutes >= minutesOfDay(start) && dataMinutes <= minutesOfDay(end);
+        }
+        if (filtro.type === "datetime") {
+            var dataTime = toTimestamp(data);
+            return dataTime >= toTimestamp(start) && dataTime <= toTimestamp(end);
         }
         return data >= start && data <= end;
     },

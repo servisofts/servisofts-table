@@ -102,6 +102,28 @@ export var OPERADORES = {
         { value: OPERATORS.GREATER_THAN_OR_EQUAL, label: { en: "Greater than or equal to", es: "Mayor o igual que" }, params: 1 },
         { value: OPERATORS.IS_NULL, label: { en: "Is null", es: "Es nulo" }, params: 0 },
         { value: OPERATORS.IS_NOT_NULL, label: { en: "Is not null", es: "No es nulo" }, params: 0 },
+    ],
+    time: [
+        { value: OPERATORS.BETWEEN, label: { en: "Between", es: "Entre" }, params: 2 },
+        { value: OPERATORS.EQUAL, label: { en: "Equal to", es: "Igual a" }, params: 1 },
+        { value: OPERATORS.NOT_EQUAL, label: { en: "Not equal to", es: "No igual a" }, params: 1 },
+        { value: OPERATORS.LESS_THAN, label: { en: "Less than", es: "Menor que" }, params: 1 },
+        { value: OPERATORS.GREATER_THAN, label: { en: "Greater than", es: "Mayor que" }, params: 1 },
+        { value: OPERATORS.LESS_THAN_OR_EQUAL, label: { en: "Less than or equal to", es: "Menor o igual que" }, params: 1 },
+        { value: OPERATORS.GREATER_THAN_OR_EQUAL, label: { en: "Greater than or equal to", es: "Mayor o igual que" }, params: 1 },
+        { value: OPERATORS.IS_NULL, label: { en: "Is null", es: "Es nulo" }, params: 0 },
+        { value: OPERATORS.IS_NOT_NULL, label: { en: "Is not null", es: "No es nulo" }, params: 0 },
+    ],
+    datetime: [
+        { value: OPERATORS.BETWEEN, label: { en: "Between", es: "Entre" }, params: 2 },
+        { value: OPERATORS.EQUAL, label: { en: "Equal to", es: "Igual a" }, params: 1 },
+        { value: OPERATORS.NOT_EQUAL, label: { en: "Not equal to", es: "No igual a" }, params: 1 },
+        { value: OPERATORS.LESS_THAN, label: { en: "Less than", es: "Menor que" }, params: 1 },
+        { value: OPERATORS.GREATER_THAN, label: { en: "Greater than", es: "Mayor que" }, params: 1 },
+        { value: OPERATORS.LESS_THAN_OR_EQUAL, label: { en: "Less than or equal to", es: "Menor o igual que" }, params: 1 },
+        { value: OPERATORS.GREATER_THAN_OR_EQUAL, label: { en: "Greater than or equal to", es: "Mayor o igual que" }, params: 1 },
+        { value: OPERATORS.IS_NULL, label: { en: "Is null", es: "Es nulo" }, params: 0 },
+        { value: OPERATORS.IS_NOT_NULL, label: { en: "Is not null", es: "No es nulo" }, params: 0 },
     ]
 };
 var ColMenu = function (props) {
@@ -113,10 +135,11 @@ var ColMenu = function (props) {
         // setSearch({ ...filtro })
     }
     var _e = React.useState([]), list = _e[0], setList = _e[1];
-    var _f = React.useState({
+    var _f = React.useState({}), counts = _f[0], setCounts = _f[1];
+    var _g = React.useState({
         dateSelec: null
-    }), state = _f[0], setState = _f[1];
-    var _g = React.useState(__assign({ col: props.col.props.id, type: props.col.props.dataType, operator: "contains", dateFormat: props.col.props.dateFormat, value: [] }, filtro)), search = _g[0], setSearch = _g[1];
+    }), state = _g[0], setState = _g[1];
+    var _h = React.useState(__assign({ col: props.col.props.id, type: props.col.props.dataType, operator: "contains", dateFormat: props.col.props.dateFormat, value: [] }, filtro)), search = _h[0], setSearch = _h[1];
     var commitFilter = function (newSearch) {
         var _a;
         setSearch(newSearch);
@@ -136,13 +159,27 @@ var ColMenu = function (props) {
         }
         instance.applyFilter();
     };
+    // What the filter picker groups by: day/time/full-timestamp for date-ish
+    // columns (ignoring the column's own display dateFormat), the raw value otherwise.
+    var groupValue = function (raw) {
+        var _a;
+        if (!raw)
+            return raw;
+        if (props.col.props.dataType == "date")
+            return String(new SDate(raw).toString("yyyy-MM-dd"));
+        if (props.col.props.dataType == "time")
+            return String(new SDate(raw).toString("hh:mm:ss"));
+        if (props.col.props.dataType == "datetime")
+            return String(new SDate(raw).toString((_a = props.col.props.dateFormat) !== null && _a !== void 0 ? _a : "yyyy-MM-dd hh:mm:ss"));
+        return raw;
+    };
     // const searchRef = React.useRef(search);
     // useEffect(() => {
     //     searchRef.current = search;
     // }, [search])
     useEffect(function () {
         var formatData = function () { return __awaiter(void 0, void 0, void 0, function () {
-            var maxIndex, dataFormat, dataFilter, rows, sortKeys, groups, order;
+            var maxIndex, dataFormat, dataFilter, rows, sortKeys, rowCounts, groups, order;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -156,24 +193,21 @@ var ColMenu = function (props) {
                         dataFilter = _a.sent();
                         rows = [];
                         sortKeys = [];
+                        rowCounts = {};
                         groups = dataFilter.reduce(function (acc, row, index) {
-                            var value = row[props.col.props.id];
-                            if (!value)
+                            var _a;
+                            var rawValue = row[props.col.props.id];
+                            if (!rawValue)
                                 return acc;
-                            if (props.col.props.dataType == "date") {
-                                if (props.col.props.dateFormat) {
-                                    value = new SDate(value).toString(props.col.props.dateFormat);
-                                }
-                                else {
-                                    value = value.toString();
-                                }
-                            }
+                            var value = groupValue(rawValue);
                             if (Array.isArray(value)) {
                                 // Array-valued columns (eg. tags/tipos) can't be represented by a
                                 // single row: a row with several values would otherwise render ALL
                                 // its values every time any one of them is newly discovered. Push a
                                 // lightweight marker for just this single value instead.
                                 value.map(function (e) {
+                                    var _a;
+                                    rowCounts[e] = ((_a = rowCounts[e]) !== null && _a !== void 0 ? _a : 0) + 1;
                                     if (!acc.includes(e)) {
                                         acc.push(e);
                                         rows.push({ __arrayFilterValue: e });
@@ -181,16 +215,20 @@ var ColMenu = function (props) {
                                     }
                                 });
                             }
-                            else if (!acc.includes(value)) {
-                                rows.push(row);
-                                sortKeys.push(String(value));
-                                acc.push(value);
+                            else {
+                                rowCounts[value] = ((_a = rowCounts[value]) !== null && _a !== void 0 ? _a : 0) + 1;
+                                if (!acc.includes(value)) {
+                                    rows.push(row);
+                                    sortKeys.push(String(value));
+                                    acc.push(value);
+                                }
                             }
                             return acc;
                         }, []);
                         order = rows.map(function (_, i) { return i; })
                             .sort(function (a, b) { return sortKeys[a].localeCompare(sortKeys[b], undefined, { numeric: true, sensitivity: "base" }); });
                         setList(order.map(function (i) { return rows[i]; }));
+                        setCounts(rowCounts);
                         return [2 /*return*/];
                 }
             });
@@ -241,11 +279,93 @@ var ColMenu = function (props) {
         OP = OPERADORES[props.col.props.dataType].find(function (e) { return e.value == "="; });
         search.operator = "=";
     }
+    // "datetime" values are grouped by day: check the day to filter everything
+    // on that date, or check a single time underneath to filter that exact instant.
+    // Shared by "datetime" (grouped by day) and "time" (grouped by hour): check the
+    // group to filter everything under it, or check one exact time underneath for
+    // just that instant.
+    var RenderGroupedFilterList = function (groupFormat) {
+        var styleText = StyleSheet.flatten([{ color: colors.text }, props.col.props.dinamicTableInstance.props.textStyle, props.col.props.textStyle]);
+        var groups = [];
+        list.forEach(function (row) {
+            var d = row[props.col.props.id];
+            var dayKey = String(new SDate(d).toString(groupFormat));
+            var iso = d.toISOString();
+            var group = groups.find(function (g) { return g.dayKey === dayKey; });
+            if (!group) {
+                group = { dayKey: dayKey, items: [] };
+                groups.push(group);
+            }
+            if (!group.items.some(function (it) { return it.iso === iso; })) {
+                group.items.push({ iso: iso, timeLabel: String(new SDate(d).toString("hh:mm:ss")) });
+            }
+        });
+        return React.createElement(View, { style: { flex: 1, minHeight: 0 } },
+            React.createElement(ScrollView, { style: { flex: 1 }, contentContainerStyle: { padding: 4, paddingBottom: 12 } }, groups.map(function (group) {
+                var currentValue = Array.isArray(search.value) ? search.value : [];
+                var checkedCount = group.items.filter(function (it) { return currentValue.includes(it.iso); }).length;
+                var allChecked = group.items.length > 0 && checkedCount === group.items.length;
+                return React.createElement(View, { key: group.dayKey, style: {
+                        marginBottom: 6,
+                        borderRadius: 6,
+                        backgroundColor: allChecked ? colors.accent + "22" : "transparent",
+                        padding: 4
+                    } },
+                    React.createElement(TouchableOpacity, { style: { flexDirection: "row", alignItems: "center", paddingVertical: 2 }, onPress: function () {
+                            if (allChecked) {
+                                commitFilter(__assign(__assign({}, search), { value: currentValue.filter(function (v) { return !group.items.some(function (it) { return it.iso === v; }); }) }));
+                            }
+                            else {
+                                var toAdd = group.items.map(function (it) { return it.iso; }).filter(function (iso) { return !currentValue.includes(iso); });
+                                commitFilter(__assign(__assign({}, search), { value: __spreadArray(__spreadArray([], currentValue, true), toAdd, true) }));
+                            }
+                        } },
+                        React.createElement(CheckBox, { value: allChecked, color: colors.accent, colorActive: colors.accent }),
+                        React.createElement(View, { style: { width: 6 } }),
+                        React.createElement(Text, { numberOfLines: 1, style: [styleText, { fontWeight: "700", fontSize: 12 }] }, group.dayKey),
+                        React.createElement(View, { style: { flex: 1 } }),
+                        React.createElement(Text, { numberOfLines: 1, style: { color: colors.card, fontSize: 9, opacity: 0.7, marginLeft: 6, fontVariant: ["tabular-nums"] } }, checkedCount > 0 ? "".concat(checkedCount, "/").concat(group.items.length) : "".concat(group.items.length))),
+                    React.createElement(View, { style: { flexDirection: "row" } },
+                        React.createElement(View, { style: { width: 8 } }),
+                        React.createElement(View, { style: { width: 1, backgroundColor: colors.border, marginVertical: 2 } }),
+                        React.createElement(View, { style: { width: 8 } }),
+                        React.createElement(View, { style: { flex: 1, paddingTop: 2 } }, group.items.map(function (it) {
+                            var isCheck = currentValue.includes(it.iso);
+                            return React.createElement(TouchableOpacity, { key: it.iso, style: {
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    paddingVertical: 3,
+                                    paddingHorizontal: 4,
+                                    borderRadius: 4,
+                                    marginTop: 2,
+                                    backgroundColor: isCheck ? colors.accent + "18" : "transparent"
+                                }, onPress: function () {
+                                    if (isCheck) {
+                                        commitFilter(__assign(__assign({}, search), { value: currentValue.filter(function (v) { return v != it.iso; }) }));
+                                    }
+                                    else {
+                                        commitFilter(__assign(__assign({}, search), { value: __spreadArray(__spreadArray([], currentValue, true), [it.iso], false) }));
+                                    }
+                                } },
+                                React.createElement(CheckBox, { value: isCheck, color: colors.accent, colorActive: colors.accent }),
+                                React.createElement(View, { style: { width: 6 } }),
+                                React.createElement(Text, { numberOfLines: 1, style: [styleText, { fontSize: 11 }] }, it.timeLabel));
+                        }))));
+            })));
+    };
     var RenderFilterList = function () {
         if (!!props.col.props.disableFilter)
             return null;
         if (!!props.col.props.disableFilterGroup)
             return null;
+        if (props.col.props.dataType == "datetime" || props.col.props.dataType == "time") {
+            return React.createElement(React.Fragment, null,
+                React.createElement(View, { style: { height: 5 } }),
+                React.createElement(View, { style: { height: 1, backgroundColor: colors.border } }),
+                React.createElement(View, { style: { height: 4 } }),
+                RenderGroupedFilterList(props.col.props.dataType == "time" ? "hh:00" : "yyyy-MM-dd"),
+                React.createElement(View, { style: { height: 1, backgroundColor: colors.border } }));
+        }
         return React.createElement(React.Fragment, null,
             React.createElement(View, { style: { height: 5 } }),
             React.createElement(View, { style: { height: 1, backgroundColor: colors.border } }),
@@ -259,6 +379,7 @@ var ColMenu = function (props) {
                         // borderColor: colors.border,
                         borderRadius: 4
                     }, contentContainerStyle: { padding: 4, paddingBottom: 40 }, ItemSeparatorComponent: function () { return React.createElement(View, { style: { height: 8 } }); }, renderItem: function (_a) {
+                        var _b, _c, _d;
                         var item = _a.item, index = _a.index;
                         if (item && item.__arrayFilterValue !== undefined) {
                             var value_1 = item.__arrayFilterValue;
@@ -281,11 +402,13 @@ var ColMenu = function (props) {
                                 React.createElement(CheckBox, { value: isCheck_1, color: colors.accent, colorActive: colors.accent }),
                                 React.createElement(View, { style: { width: 4 } }),
                                 React.createElement(View, { style: { flex: 1 }, pointerEvents: "none" },
-                                    React.createElement(Text, { numberOfLines: 1, style: [styleText] }, value_1)));
+                                    React.createElement(Text, { numberOfLines: 1, style: [styleText] }, value_1)),
+                                React.createElement(Text, { numberOfLines: 1, style: { color: colors.card, fontSize: 9, opacity: 0.7, marginLeft: 6, fontVariant: ["tabular-nums"] } }, (_b = counts[value_1]) !== null && _b !== void 0 ? _b : 0));
                         }
                         var COMPONENT = null;
                         var colData = props.col.props.dinamicTableInstance.colData[props.col.props.id];
                         var data = item[props.col.props.id];
+                        var count = (_c = counts[groupValue(data)]) !== null && _c !== void 0 ? _c : 0;
                         if (props.col.props.customComponent)
                             COMPONENT = props.col.props.customComponent({
                                 data: item[props.col.props.id],
@@ -294,26 +417,43 @@ var ColMenu = function (props) {
                                 index: index,
                                 dinamicTable: props.col.props.dinamicTableInstance,
                                 textStyle: { color: colors.text },
-                                colData: colData
+                                colData: colData,
+                                filterList: true
                             });
                         else {
                             if (props.col.props.format) {
                                 data = props.col.props.format({ data: item[props.col.props.id], row: item.__original, index: index, textStyle: { color: colors.text } });
                             }
-                            else if (props.col.props.dataType == "date" && props.col.props.dateFormat) {
-                                data = new SDate(data).toString(props.col.props.dateFormat);
+                            else if (props.col.props.dataType == "date") {
+                                data = new SDate(data).toString("yyyy-MM-dd");
+                            }
+                            else if (props.col.props.dataType == "time") {
+                                data = new SDate(data).toString("hh:mm:ss");
+                            }
+                            else if (props.col.props.dataType == "datetime") {
+                                data = new SDate(data).toString((_d = props.col.props.dateFormat) !== null && _d !== void 0 ? _d : "yyyy-MM-dd hh:mm:ss");
                             }
                             var styleText = StyleSheet.flatten([{ color: colors.text }, props.col.props.dinamicTableInstance.props.textStyle, props.col.props.textStyle]);
-                            COMPONENT = React.createElement(Text, { numberOfLines: 1, style: [styleText] }, !data ? null : data.toString());
+                            // Default filter text to Title Case regardless of how the
+                            // underlying value is cased ("ERICKA SEVILLANO" -> "Ericka Sevillano"),
+                            // it reads better than all-caps or all-lowercase. Only applies
+                            // to plain text (no format/customComponent already styling it).
+                            COMPONENT = React.createElement(Text, { numberOfLines: 1, style: [styleText, { textTransform: "capitalize" }] }, !data ? null : data.toString());
                         }
-                        if (props.col.props.dataType == "date") {
+                        if (props.col.props.dataType == "date" || props.col.props.dataType == "time" || props.col.props.dataType == "datetime") {
                             var da = item[props.col.props.id];
                             data = da.toISOString();
                         }
                         var isCheck = search.value.includes(!data ? null : data.toString());
                         return React.createElement(TouchableOpacity, { style: {
                                 flexDirection: "row",
-                                alignItems: "center"
+                                alignItems: "center",
+                                // Keep every row the same height no matter what the column's
+                                // customComponent renders (a photo, an initials circle, plain
+                                // text, ...): oversized content gets clipped instead of
+                                // stretching this row taller than its neighbours.
+                                height: 28,
+                                overflow: "hidden"
                             }, onPress: function () {
                                 if (!Array.isArray(search.value)) {
                                     search.value = [];
@@ -327,7 +467,8 @@ var ColMenu = function (props) {
                             } },
                             React.createElement(CheckBox, { value: isCheck, color: colors.accent, colorActive: colors.accent }),
                             React.createElement(View, { style: { width: 4 } }),
-                            React.createElement(View, { style: { flex: 1 }, pointerEvents: "none" }, COMPONENT));
+                            React.createElement(View, { style: { flex: 1, height: "100%", flexDirection: "row", alignItems: "center" }, pointerEvents: "none" }, COMPONENT),
+                            React.createElement(Text, { numberOfLines: 1, style: { color: colors.card, fontSize: 9, opacity: 0.7, marginLeft: 6, fontVariant: ["tabular-nums"] } }, count));
                     } })),
             React.createElement(View, { style: { height: 1, backgroundColor: colors.border } }));
     };
@@ -335,9 +476,9 @@ var ColMenu = function (props) {
         // let valtxt = !Array.isArray(search.value) ? search.value : search.value[index]
         var valtxt = search.value[index];
         if (!!valtxt) {
-            if (props.col.props.dateFormat) {
-                valtxt = new SDate(valtxt).toString(props.col.props.dateFormat);
-            }
+            // The calendar only ever picks a day, so always show just the day here
+            // regardless of the column's (possibly full datetime) dateFormat.
+            valtxt = new SDate(valtxt).toString("yyyy-MM-dd");
         }
         return React.createElement(TouchableOpacity, { style: [props.col.props.dinamicTableInstance.inputStyle, {
                     flexDirection: "row",
@@ -384,7 +525,9 @@ var ColMenu = function (props) {
     };
     var RenderFilterTypeText = function (index) {
         return React.createElement(View, null,
-            React.createElement(TextInput, { placeholder: SLanguage.select({ en: "Search...", es: "Buscar..." }), 
+            React.createElement(TextInput, { placeholder: props.col.props.dataType == "time" ? "HH:mm" :
+                    props.col.props.dataType == "datetime" ? "yyyy-MM-dd HH:mm:ss" :
+                        SLanguage.select({ en: "Search...", es: "Buscar..." }), 
                 // value={search.value}
                 value: !Array.isArray(search.value) ? search.value : "", placeholderTextColor: colors.card, style: [props.col.props.dinamicTableInstance.inputStyle, { paddingStart: 24 }], 
                 // autoFocus
@@ -458,10 +601,10 @@ var ColMenu = function (props) {
                     React.createElement(Assets.Arrow, { width: 16, height: 16, stroke: colors.accent }),
                     React.createElement(View, { style: { width: 2 } }),
                     React.createElement(Text, { numberOfLines: 1, style: { color: colors.text, fontSize: 12 } }, SLanguage.select({
-                        en: "Asending",
+                        en: "Ascending",
                         es: "Ascendente"
                     }))),
-                React.createElement(View, { style: { height: 4 } }),
+                React.createElement(View, { style: { width: 8 } }),
                 React.createElement(TouchableOpacity, { onPress: function () {
                         hanldeSort("desc");
                     }, style: { flex: 1, flexDirection: "row", alignItems: "center" } },

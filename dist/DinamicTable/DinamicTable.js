@@ -437,6 +437,8 @@ var DinamicTable = /** @class */ (function (_super) {
                                 data = Array.isArray(data) ? data : data + "";
                                 break;
                             case "date":
+                            case "time":
+                            case "datetime":
                                 if (!!data) {
                                     if (data instanceof Date) {
                                         data = data;
