@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Animated, FlatList, PanResponder, ScrollView, StyleSheet, Text, TextInput, TextStyle, TouchableOpacity, View, } from "react-native";
+import { Animated, FlatList, PanResponder, ScrollView, StyleSheet, Text, TextInput, TextStyle, TouchableOpacity, View, ViewStyle, } from "react-native";
 import DinamicTable, { CellStyle } from "../DinamicTable";
 import { DataType } from "..";
 import Select from "../../Components/Select";
@@ -333,6 +333,11 @@ const ColMenu = (props: { col: Col<any> }) => {
     const RenderFilterList = () => {
         if (!!props.col.props.disableFilter) return null;
         if (!!props.col.props.disableFilterGroup) return null;
+        // Columns aligned to "center" or "flex-end" render their values on the
+        // right in the actual table; mirror that in the filter checklist too,
+        // instead of centering the value (which reads as misaligned there).
+        const cellAlign = props.col.props.cellStyle?.alignItems;
+        const filterValueAlign: ViewStyle = (cellAlign === "center" || cellAlign === "flex-end") ? { justifyContent: "flex-end" } : {};
         if (props.col.props.dataType == "datetime" || props.col.props.dataType == "time") {
             return <>
                 <View style={{ height: 5, }} />
@@ -378,7 +383,7 @@ const ColMenu = (props: { col: Col<any> }) => {
                             }}>
                                 <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} colorIcon={colors.text} />
                                 <View style={{ width: 4 }} />
-                                <View style={{ flex: 1, }} pointerEvents="none">
+                                <View style={{ flex: 1, flexDirection: "row", ...filterValueAlign }} pointerEvents="none">
                                     <Text numberOfLines={1} style={[styleText]}>{value}</Text>
                                 </View>
                                 <Text numberOfLines={1} style={{ color: colors.card, fontSize: 9, opacity: 0.7, marginLeft: 6, fontVariant: ["tabular-nums"] }}>{counts[value] ?? 0}</Text>
@@ -451,7 +456,7 @@ const ColMenu = (props: { col: Col<any> }) => {
                         }}>
                             <CheckBox value={isCheck} color={colors.accent} colorActive={colors.accent} colorIcon={colors.text} />
                             <View style={{ width: 4 }} />
-                            <View style={{ flex: 1, height: "100%", flexDirection: "row", alignItems: "center" }} pointerEvents="none">
+                            <View style={{ flex: 1, height: "100%", flexDirection: "row", alignItems: "center", ...filterValueAlign }} pointerEvents="none">
                                 {COMPONENT}
                             </View>
                             <Text numberOfLines={1} style={{ color: colors.card, fontSize: 9, opacity: 0.7, marginLeft: 6, fontVariant: ["tabular-nums"] }}>{count}</Text>

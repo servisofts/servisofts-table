@@ -358,10 +358,16 @@ var ColMenu = function (props) {
             })));
     };
     var RenderFilterList = function () {
+        var _a;
         if (!!props.col.props.disableFilter)
             return null;
         if (!!props.col.props.disableFilterGroup)
             return null;
+        // Columns aligned to "center" or "flex-end" render their values on the
+        // right in the actual table; mirror that in the filter checklist too,
+        // instead of centering the value (which reads as misaligned there).
+        var cellAlign = (_a = props.col.props.cellStyle) === null || _a === void 0 ? void 0 : _a.alignItems;
+        var filterValueAlign = (cellAlign === "center" || cellAlign === "flex-end") ? { justifyContent: "flex-end" } : {};
         if (props.col.props.dataType == "datetime" || props.col.props.dataType == "time") {
             return React.createElement(React.Fragment, null,
                 React.createElement(View, { style: { height: 5 } }),
@@ -405,7 +411,7 @@ var ColMenu = function (props) {
                                 } },
                                 React.createElement(CheckBox, { value: isCheck_1, color: colors.accent, colorActive: colors.accent, colorIcon: colors.text }),
                                 React.createElement(View, { style: { width: 4 } }),
-                                React.createElement(View, { style: { flex: 1 }, pointerEvents: "none" },
+                                React.createElement(View, { style: __assign({ flex: 1, flexDirection: "row" }, filterValueAlign), pointerEvents: "none" },
                                     React.createElement(Text, { numberOfLines: 1, style: [styleText] }, value_1)),
                                 React.createElement(Text, { numberOfLines: 1, style: { color: colors.card, fontSize: 9, opacity: 0.7, marginLeft: 6, fontVariant: ["tabular-nums"] } }, (_b = counts[value_1]) !== null && _b !== void 0 ? _b : 0));
                         }
@@ -471,7 +477,7 @@ var ColMenu = function (props) {
                             } },
                             React.createElement(CheckBox, { value: isCheck, color: colors.accent, colorActive: colors.accent, colorIcon: colors.text }),
                             React.createElement(View, { style: { width: 4 } }),
-                            React.createElement(View, { style: { flex: 1, height: "100%", flexDirection: "row", alignItems: "center" }, pointerEvents: "none" }, COMPONENT),
+                            React.createElement(View, { style: __assign({ flex: 1, height: "100%", flexDirection: "row", alignItems: "center" }, filterValueAlign), pointerEvents: "none" }, COMPONENT),
                             React.createElement(Text, { numberOfLines: 1, style: { color: colors.card, fontSize: 9, opacity: 0.7, marginLeft: 6, fontVariant: ["tabular-nums"] } }, count));
                     } })),
             React.createElement(View, { style: { height: 1, backgroundColor: colors.border } }));
