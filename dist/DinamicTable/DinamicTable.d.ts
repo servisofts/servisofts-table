@@ -93,6 +93,7 @@ type DinamicTablePropsType<T> = {
     }) => ReactElement | null;
     onSelectionChange?: (rows: T[]) => void;
     headerGroups?: HeaderGroupType[];
+    indexar?: boolean;
 };
 type rowEventListenersType = {
     type: "onSelect";

@@ -15,6 +15,7 @@ import Grouper, { GrouperType } from "./Grouper";
 import MenuGrouper from "./Grouper/MenuGrouper";
 import SLanguage, { Language } from "../Components/SLanguage";
 import CheckHeader from "./Components/CheckHeader";
+import Paginador from "./Components/Paginador";
 
 const CHECK_COL_WIDTH = 36;
 
@@ -80,6 +81,8 @@ type DinamicTablePropsType<T> = {
     headerStyle?: ViewStyle,
     headerTextStyle?: TextStyle,
     padding?: number,
+    // Cantidad de filas por página. Al definirlo, además de cortar los datos, se muestra
+    // automáticamente un paginador (‹ Anterior / Página X de Y / Siguiente ›) en la barra superior.
     pageLimit?: number,
     renderError?: (p: { error: any, dinamicTable: DinamicTable<T> }) => ReactElement,
     renderNoResults?: (p: { dinamicTable: DinamicTable<T> }) => ReactElement,
@@ -87,8 +90,13 @@ type DinamicTablePropsType<T> = {
     renderHeaderActions?: (p: { dinamicTable: DinamicTable<T> }) => ReactElement | null,
     onSelectionChange?: (rows: T[]) => void,
     headerGroups?: HeaderGroupType[],
+    // Si es true, antepone una columna "N°" con el correlativo de la fila (considera la página actual),
+    // sin necesidad de declararla a mano como DinamicTable.Col.
+    indexar?: boolean,
 
 }
+
+const INDEX_COL_KEY = "__index__";
 
 
 
@@ -347,6 +355,33 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
 
         this.headers = [];
         this.cols = [];
+
+        if (this.props.indexar) {
+            const indexCol: any = React.createElement(Col as any, {
+                key: INDEX_COL_KEY,
+                label: "N°",
+                width: 50,
+                dataType: "number",
+                disableFilter: true,
+                disableSorter: true,
+                disableGrouper: true,
+                disableExport: true,
+                data: (p: { row: any, index: number }) => p.index + 1,
+                // p.index es la posición dentro de la página actual (se reinicia en cada página),
+                // así que se suma el offset de página para obtener el correlativo real: 1, 2, 3...
+                customComponent: (p: any) => {
+                    const pageLimit = p.dinamicTable.props.pageLimit || 0;
+                    const offset = pageLimit ? (p.dinamicTable.state.currentPage - 1) * pageLimit : 0;
+                    return <Text style={p.textStyle}>{offset + p.index + 1}</Text>;
+                },
+            })
+            this.cols.push(indexCol)
+            this.colData[INDEX_COL_KEY] = {
+                width: indexCol.props.width,
+                wrap: indexCol.props.wrap
+            }
+        }
+
         for (let i = 0; i < children.length; i++) {
             const child = children[i]
             if (child.type === Header) {
@@ -872,6 +907,7 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
                     <MenuFilter dinamicTableInstance={this} />
                     <MenuGrouper dinamicTableInstance={this} />
                     {this.props.renderHeaderActions && this.props.renderHeaderActions({ dinamicTable: this })}
+                    {this.props.pageLimit ? <Paginador dinamicTableInstance={this} /> : null}
                 </View>
 
                 <View style={{ height: 4 }} />

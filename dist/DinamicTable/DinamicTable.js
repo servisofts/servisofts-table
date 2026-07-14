@@ -86,7 +86,9 @@ import Grouper from "./Grouper";
 import MenuGrouper from "./Grouper/MenuGrouper";
 import SLanguage from "../Components/SLanguage";
 import CheckHeader from "./Components/CheckHeader";
+import Paginador from "./Components/Paginador";
 var CHECK_COL_WIDTH = 36;
+var INDEX_COL_KEY = "__index__";
 var DinamicTable = /** @class */ (function (_super) {
     __extends(DinamicTable, _super);
     function DinamicTable(props) {
@@ -328,6 +330,31 @@ var DinamicTable = /** @class */ (function (_super) {
         }
         this.headers = [];
         this.cols = [];
+        if (this.props.indexar) {
+            var indexCol = React.createElement(Col, {
+                key: INDEX_COL_KEY,
+                label: "N°",
+                width: 50,
+                dataType: "number",
+                disableFilter: true,
+                disableSorter: true,
+                disableGrouper: true,
+                disableExport: true,
+                data: function (p) { return p.index + 1; },
+                // p.index es la posición dentro de la página actual (se reinicia en cada página),
+                // así que se suma el offset de página para obtener el correlativo real: 1, 2, 3...
+                customComponent: function (p) {
+                    var pageLimit = p.dinamicTable.props.pageLimit || 0;
+                    var offset = pageLimit ? (p.dinamicTable.state.currentPage - 1) * pageLimit : 0;
+                    return React.createElement(Text, { style: p.textStyle }, offset + p.index + 1);
+                }
+            });
+            this.cols.push(indexCol);
+            this.colData[INDEX_COL_KEY] = {
+                width: indexCol.props.width,
+                wrap: indexCol.props.wrap
+            };
+        }
         for (var i = 0; i < children.length; i++) {
             var child = children[i];
             if (child.type === Header) {
@@ -817,7 +844,8 @@ var DinamicTable = /** @class */ (function (_super) {
                 React.createElement(MenuSorter, { dinamicTableInstance: this }),
                 React.createElement(MenuFilter, { dinamicTableInstance: this }),
                 React.createElement(MenuGrouper, { dinamicTableInstance: this }),
-                this.props.renderHeaderActions && this.props.renderHeaderActions({ dinamicTable: this })),
+                this.props.renderHeaderActions && this.props.renderHeaderActions({ dinamicTable: this }),
+                this.props.pageLimit ? React.createElement(Paginador, { dinamicTableInstance: this }) : null),
             React.createElement(View, { style: { height: 4 } }),
             Platform.OS === "web"
                 ? this.renderWebLayout(contentMinWidth)
