@@ -140,6 +140,12 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
     _webFooterHeight: number;
     _webListFooterHeight: number;
     _sFlashRef: SFlashList | null;
+    _webDataCache: {
+        paginatedData: any[] | null;
+        hasListFooter: boolean;
+        hasData: boolean;
+        result: any[];
+    };
     props: DinamicTablePropsType<T>;
     constructor(props: DinamicTablePropsType<T>);
     rowEventListeners: {

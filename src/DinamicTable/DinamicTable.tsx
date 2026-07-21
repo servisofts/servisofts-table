@@ -175,6 +175,12 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
     _webFooterHeight: number = 0;
     _webListFooterHeight: number = 0;
     _sFlashRef: SFlashList | null = null;
+    // Cache de webData: SFlashList borra su cache de alturas medidas cuando su prop `data`
+    // cambia de referencia (ver SFlashList.componentDidUpdate). Sin este cache, el spread de
+    // abajo crea un array nuevo en cada render de DinamicTable (p.ej. al abrir un popup desde
+    // onSelect, que re-renderiza el árbol aunque paginatedData no haya cambiado), lo que borra
+    // las alturas ya medidas de filas con contenido multilínea y deforma la lista un instante.
+    _webDataCache: { paginatedData: any[] | null, hasListFooter: boolean, hasData: boolean, result: any[] } = { paginatedData: null, hasListFooter: false, hasData: false, result: [] };
     props: DinamicTablePropsType<T>
     constructor(props: DinamicTablePropsType<T>) {
         super(props)
@@ -747,9 +753,17 @@ export default class DinamicTable<T> extends React.Component<DinamicTablePropsTy
 
         // listFooterComponent is appended as the last virtual item so it appears
         // immediately after the last data row (not anchored to the container bottom).
-        const webData = (hasData && hasListFooter)
-            ? [...paginatedData, { __type: "list-footer", __key: "__list-footer__" }]
-            : paginatedData;
+        // Cached so identical inputs return the SAME array reference across renders
+        // (see _webDataCache comment above) instead of allocating a new one every time.
+        let webData: any[];
+        if (this._webDataCache.paginatedData === paginatedData && this._webDataCache.hasListFooter === hasListFooter && this._webDataCache.hasData === hasData) {
+            webData = this._webDataCache.result;
+        } else {
+            webData = (hasData && hasListFooter)
+                ? [...paginatedData, { __type: "list-footer", __key: "__list-footer__" }]
+                : paginatedData;
+            this._webDataCache = { paginatedData, hasListFooter, hasData, result: webData };
+        }
 
         if (!hasColFooters && this._webFooterHeight !== 0) this._webFooterHeight = 0;
         // listHeight is measured explicitly to avoid Yoga / CSS overflow interaction issues.

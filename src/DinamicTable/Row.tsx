@@ -117,7 +117,7 @@ export default class Row<T> extends React.PureComponent<RowPropsType<T>> {
                             textStyle: styleText
                         })
                     } else {
-                        dataFormat = !data ? "" : data.toString();
+                        dataFormat = (data === null || data === undefined || data === "") ? "" : data.toString();
                         if (dataFormat) {
                             if (colProps.dataType === "date" || colProps.dataType === "time" || colProps.dataType === "datetime") {
                                 if (colProps.dateFormat) {
